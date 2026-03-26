@@ -37,6 +37,7 @@ jobs:
     
     - name: Set up environment variables
       run: |
+        echo "DATABASE_URL=sqlite:///./test.db" >> $GITHUB_ENV
         echo "SECRET_KEY=test-secret-key-for-ci-only" >> $GITHUB_ENV
         echo "ALGORITHM=HS256" >> $GITHUB_ENV
         echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> $GITHUB_ENV
