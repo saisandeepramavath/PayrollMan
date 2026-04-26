@@ -3,7 +3,7 @@ PunchEntry Service - Business logic for punch entries
 """
 
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
@@ -14,6 +14,22 @@ from src.app.repositories.punch_entry_repository import PunchEntryRepository
 
 class PunchEntryService:
     """Punch Entry business logic"""
+
+    @staticmethod
+    def _resolve_work_date(value: datetime) -> date:
+        """Map a punch timestamp to the user's local calendar day for the date column."""
+        if value.tzinfo is None:
+            return value.date()
+        return value.astimezone().date()
+
+    @staticmethod
+    def _normalize_for_storage(value: Optional[datetime]) -> Optional[datetime]:
+        """Store datetimes as naive UTC because SQLite drops tzinfo."""
+        if value is None:
+            return None
+        if value.tzinfo is not None:
+            return value.astimezone(timezone.utc).replace(tzinfo=None)
+        return value
     
     @staticmethod
     def punch_in(
@@ -48,16 +64,24 @@ class PunchEntryService:
         
         # Use current time if not provided
         if not punch_in_time:
-            punch_in_time = datetime.utcnow()
+            punch_in_time = datetime.now().astimezone()
+
+        work_date = PunchEntryService._resolve_work_date(punch_in_time)
+
+        punch_in_time = PunchEntryService._normalize_for_storage(punch_in_time)
         
         # Create punch entry
         entry = PunchEntryRepository.create(
             db=db,
             user_id=user_id,
-            date_value=punch_in_time.date(),
+            date_value=work_date,
             punch_in=punch_in_time,
             notes=notes
         )
+
+        from src.app.services.timecard_submission_service import TimecardSubmissionService
+
+        TimecardSubmissionService.reset_submission_for_date(db, user_id, punch_in_time)
         
         return entry
     
@@ -94,14 +118,26 @@ class PunchEntryService:
         
         # Use current time if not provided
         if not punch_out_time:
-            punch_out_time = datetime.utcnow()
-        
+            punch_out_time = datetime.now(timezone.utc)
+
+        # Normalize to naive UTC for comparison/storage (SQLite strips tz info)
+        punch_out_naive = PunchEntryService._normalize_for_storage(punch_out_time)
+
+        # Normalize punch_in from DB to naive UTC as well (it's stored naive)
+        punch_in_naive = (
+            active_entry.punch_in.replace(tzinfo=None)
+            if active_entry.punch_in.tzinfo
+            else active_entry.punch_in
+        )
+
         # Validate punch_out is after punch_in
-        if punch_out_time <= active_entry.punch_in:
+        if punch_out_naive <= punch_in_naive:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Punch out time must be after punch in time"
             )
+
+        punch_out_time = punch_out_naive
         
         # Append notes if provided
         if notes:
@@ -113,6 +149,10 @@ class PunchEntryService:
             entry=active_entry,
             punch_out=punch_out_time
         )
+
+        from src.app.services.timecard_submission_service import TimecardSubmissionService
+
+        TimecardSubmissionService.reset_submission_for_date(db, user_id, punch_out_time)
         
         return updated_entry
     
@@ -150,8 +190,11 @@ class PunchEntryService:
         Raises:
             HTTPException: If validation fails
         """
+        punch_in_value = PunchEntryService._normalize_for_storage(entry_data.punch_in)
+        punch_out_value = PunchEntryService._normalize_for_storage(entry_data.punch_out)
+
         # Validate punch_out is after punch_in if provided
-        if entry_data.punch_out and entry_data.punch_out <= entry_data.punch_in:
+        if punch_out_value and punch_out_value <= punch_in_value:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Punch out time must be after punch in time"
@@ -162,10 +205,14 @@ class PunchEntryService:
             db=db,
             user_id=user_id,
             date_value=entry_data.date,
-            punch_in=entry_data.punch_in,
-            punch_out=entry_data.punch_out,
+            punch_in=punch_in_value,
+            punch_out=punch_out_value,
             notes=entry_data.notes
         )
+
+        from src.app.services.timecard_submission_service import TimecardSubmissionService
+
+        TimecardSubmissionService.reset_submission_for_date(db, user_id, punch_in_value)
         
         return entry
     
@@ -198,16 +245,7 @@ class PunchEntryService:
         elif start_date:
             return PunchEntryRepository.get_by_date(db=db, user_id=user_id, date_value=start_date)
         else:
-            # Get last 30 days by default
-            from datetime import timedelta
-            end = date.today()
-            start = end - timedelta(days=30)
-            return PunchEntryRepository.get_by_date_range(
-                db=db,
-                user_id=user_id,
-                start_date=start,
-                end_date=end
-            )
+            return PunchEntryRepository.get_by_user(db=db, user_id=user_id)
     
     @staticmethod
     def get_punch_entry(db: Session, entry_id: int, user_id: int) -> PunchEntry:
@@ -275,8 +313,12 @@ class PunchEntryService:
             )
         
         # Validate punch times
-        punch_in = entry_data.punch_in or entry.punch_in
-        punch_out = entry_data.punch_out if entry_data.punch_out is not None else entry.punch_out
+        punch_in = PunchEntryService._normalize_for_storage(entry_data.punch_in) or entry.punch_in
+        punch_out = (
+            PunchEntryService._normalize_for_storage(entry_data.punch_out)
+            if entry_data.punch_out is not None
+            else entry.punch_out
+        )
         
         if punch_out and punch_out <= punch_in:
             raise HTTPException(
@@ -289,9 +331,17 @@ class PunchEntryService:
             db=db,
             entry=entry,
             date_value=entry_data.date,
-            punch_in=entry_data.punch_in,
-            punch_out=entry_data.punch_out,
+            punch_in=PunchEntryService._normalize_for_storage(entry_data.punch_in),
+            punch_out=PunchEntryService._normalize_for_storage(entry_data.punch_out),
             notes=entry_data.notes
+        )
+
+        from src.app.services.timecard_submission_service import TimecardSubmissionService
+
+        TimecardSubmissionService.reset_submission_for_date(
+            db,
+            user_id,
+            PunchEntryService._normalize_for_storage(entry_data.punch_in) or entry_data.date or entry.punch_in,
         )
         
         return updated_entry
@@ -320,8 +370,14 @@ class PunchEntryService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Punch entry not found"
             )
+
+        target_date = entry.punch_in
         
         PunchEntryRepository.delete(db=db, entry=entry)
+
+        from src.app.services.timecard_submission_service import TimecardSubmissionService
+
+        TimecardSubmissionService.reset_submission_for_date(db, user_id, target_date)
     
     @staticmethod
     def get_daily_hours(db: Session, user_id: int, date_value: date) -> float:

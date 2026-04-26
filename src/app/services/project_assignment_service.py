@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 from datetime import datetime
 
 from src.app.models.project_assignment import ProjectAssignment, AssignmentStatus
+from src.app.models.user import User
 from src.app.schemas.project_assignment import (
     ProjectAssignmentCreate,
     ProjectAssignmentUpdate,
@@ -15,6 +16,7 @@ from src.app.schemas.project_assignment import (
 )
 from src.app.repositories.project_assignment_repository import ProjectAssignmentRepository
 from src.app.repositories.project_repository import ProjectRepository
+from src.app.repositories.timecard_repository import TimecardRepository
 
 
 class ProjectAssignmentService:
@@ -49,14 +51,33 @@ class ProjectAssignmentService:
                 detail="Project not found"
             )
         
-        # Check if project is active
+        # Check if project exists and is assignable (active or on_hold)
         from src.app.models.project import ProjectStatus
-        if project.status != ProjectStatus.ACTIVE:
+        if project.status == ProjectStatus.CANCELLED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot assign users to non-active projects"
+                detail="Cannot assign users to a cancelled project"
             )
-        
+
+        # Permission check: self-assignment (request to join) is allowed for
+        # all authenticated users.  Assigning *another* user requires either
+        # can_manage_assignments, being the project creator, or supervisor.
+        if assignment_data.user_id != assigner_id:
+            assigner = db.query(User).filter(User.id == assigner_id).first()
+            is_project_lead = (
+                project.creator_id == assigner_id
+                or project.supervisor_id == assigner_id
+            )
+            has_role_permission = assigner and (
+                assigner.is_superuser
+                or (assigner.role and assigner.role.can_manage_assignments)
+            )
+            if not is_project_lead and not has_role_permission:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to assign other users to projects"
+                )
+
         # Verify user exists
         from src.app.repositories.user_repository import UserRepository
         user = UserRepository.get_by_id(db=db, user_id=assignment_data.user_id)
@@ -65,14 +86,14 @@ class ProjectAssignmentService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        
+
         # Check if user is already assigned to this project
         existing_assignment = ProjectAssignmentRepository.get_by_user_and_project(
             db=db,
             user_id=assignment_data.user_id,
             project_id=assignment_data.project_id
         )
-        
+
         if existing_assignment:
             if existing_assignment.status == AssignmentStatus.APPROVED:
                 raise HTTPException(
@@ -84,7 +105,25 @@ class ProjectAssignmentService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Assignment request is already pending approval"
                 )
-        
+            else:
+                # REJECTED or REVOKED — reopen as a fresh pending request
+                existing_assignment.status = AssignmentStatus.PENDING
+                existing_assignment.assigner_id = assigner_id
+                existing_assignment.approved_by_id = None
+                existing_assignment.approved_at = None
+                if assignment_data.role is not None:
+                    existing_assignment.role = assignment_data.role
+                if assignment_data.notes is not None:
+                    existing_assignment.notes = assignment_data.notes
+                # Auto-approve if project doesn't require approval
+                if not project.requires_approval:
+                    existing_assignment.status = AssignmentStatus.APPROVED
+                    existing_assignment.approved_by_id = assigner_id
+                    existing_assignment.approved_at = datetime.utcnow()
+                db.commit()
+                db.refresh(existing_assignment)
+                return existing_assignment
+
         # Create assignment
         assignment = ProjectAssignmentRepository.create(
             db=db,
@@ -94,7 +133,15 @@ class ProjectAssignmentService:
             role=assignment_data.role,
             notes=assignment_data.notes
         )
-        
+
+        # Auto-approve if project doesn't require approval
+        if not project.requires_approval:
+            ProjectAssignmentRepository.approve(
+                db=db,
+                assignment=assignment,
+                approver_id=assigner_id
+            )
+
         return assignment
     
     @staticmethod
@@ -145,25 +192,35 @@ class ProjectAssignmentService:
                 detail="Project not found"
             )
         
-        return ProjectAssignmentRepository.get_project_assignments(
+        assignments = ProjectAssignmentRepository.get_project_assignments(
             db=db,
             project_id=project_id,
             status=status
         )
+        for assignment in assignments:
+            assignment.assigned_since = assignment.created_at
+            assignment.total_project_hours_since_assigned = TimecardRepository.get_total_project_hours_since(
+                db=db,
+                user_id=assignment.user_id,
+                project_id=project_id,
+                start_date=assignment.created_at,
+            )
+        return assignments
     
     @staticmethod
     def get_pending_approvals(db: Session, user_id: int) -> List[ProjectAssignment]:
         """
-        Get assignments pending approval for projects user manages
-        
-        Args:
-            db: Database session
-            user_id: User ID (supervisor or creator)
-            
-        Returns:
-            List of pending assignments
+        Get assignments pending approval for projects user manages.
+        Managers with can_manage_assignments see ALL pending requests.
         """
-        return ProjectAssignmentRepository.get_pending_approvals(db=db, approver_id=user_id)
+        user = db.query(User).filter(User.id == user_id).first()
+        all_projects = user is not None and (
+            user.is_superuser or
+            (user.role and user.role.can_manage_assignments)
+        )
+        return ProjectAssignmentRepository.get_pending_approvals(
+            db=db, approver_id=user_id, all_projects=all_projects
+        )
     
     @staticmethod
     def get_assignment(db: Session, assignment_id: int) -> ProjectAssignment:
@@ -234,12 +291,18 @@ class ProjectAssignmentService:
                 detail=f"Cannot approve assignment with status: {assignment.status}"
             )
         
-        # Check permissions (creator or supervisor)
+        # Check permissions (creator, supervisor, or manager with can_manage_assignments)
         project = assignment.project
-        if project.creator_id != approver_id and project.supervisor_id != approver_id:
+        is_project_lead = project.creator_id == approver_id or project.supervisor_id == approver_id
+        approver = db.query(User).filter(User.id == approver_id).first()
+        is_manager = approver and (
+            approver.is_superuser or
+            (approver.role and approver.role.can_manage_assignments)
+        )
+        if not is_project_lead and not is_manager:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only project creator or supervisor can approve assignments"
+                detail="Only project creator, supervisor, or a manager can approve assignments"
             )
         
         # Approve assignment
@@ -293,12 +356,18 @@ class ProjectAssignmentService:
                 detail=f"Cannot reject assignment with status: {assignment.status}"
             )
         
-        # Check permissions (creator or supervisor)
+        # Check permissions (creator, supervisor, or manager with can_manage_assignments)
         project = assignment.project
-        if project.creator_id != approver_id and project.supervisor_id != approver_id:
+        is_project_lead = project.creator_id == approver_id or project.supervisor_id == approver_id
+        approver = db.query(User).filter(User.id == approver_id).first()
+        is_manager = approver and (
+            approver.is_superuser or
+            (approver.role and approver.role.can_manage_assignments)
+        )
+        if not is_project_lead and not is_manager:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only project creator or supervisor can reject assignments"
+                detail="Only project creator, supervisor, or a manager can reject assignments"
             )
         
         # Reject assignment
@@ -350,14 +419,22 @@ class ProjectAssignmentService:
                 detail=f"Cannot revoke assignment with status: {assignment.status}"
             )
         
-        # Check permissions (assigner, creator, or supervisor)
+        # Check permissions (assigner, creator, supervisor, or manager)
         project = assignment.project
-        if (assignment.assigner_id != user_id and 
-            project.creator_id != user_id and 
-            project.supervisor_id != user_id):
+        is_project_lead = (
+            assignment.assigner_id == user_id or
+            project.creator_id == user_id or
+            project.supervisor_id == user_id
+        )
+        revoker = db.query(User).filter(User.id == user_id).first()
+        is_manager = revoker and (
+            revoker.is_superuser or
+            (revoker.role and revoker.role.can_manage_assignments)
+        )
+        if not is_project_lead and not is_manager:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only assigner, project creator, or supervisor can revoke assignments"
+                detail="Only assigner, project creator, supervisor, or a manager can revoke assignments"
             )
         
         # Revoke assignment
@@ -399,15 +476,24 @@ class ProjectAssignmentService:
                 detail="Assignment not found"
             )
         
-        # Check permissions
+        # Check permissions (assigner, creator, supervisor, or role with can_manage_assignments)
         project = assignment.project
-        if (assignment.assigner_id != user_id and 
-            project.creator_id != user_id and 
-            project.supervisor_id != user_id):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only assigner, project creator, or supervisor can update assignments"
+        is_authorized = (
+            assignment.assigner_id == user_id
+            or project.creator_id == user_id
+            or project.supervisor_id == user_id
+        )
+        if not is_authorized:
+            updater = db.query(User).filter(User.id == user_id).first()
+            is_manager = updater and (
+                updater.is_superuser
+                or (updater.role and updater.role.can_manage_assignments)
             )
+            if not is_manager:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only assigner, project creator, supervisor, or a manager can update assignments"
+                )
         
         # Update assignment
         update_data = assignment_data.model_dump(exclude_unset=True)
@@ -450,12 +536,20 @@ class ProjectAssignmentService:
         
         # Check permissions
         project = assignment.project
-        if (assignment.assigner_id != user_id and 
-            project.creator_id != user_id and 
-            project.supervisor_id != user_id):
+        is_project_lead = (
+            assignment.assigner_id == user_id or
+            project.creator_id == user_id or
+            project.supervisor_id == user_id
+        )
+        deleter = db.query(User).filter(User.id == user_id).first()
+        is_manager = deleter and (
+            deleter.is_superuser or
+            (deleter.role and deleter.role.can_manage_assignments)
+        )
+        if not is_project_lead and not is_manager:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only assigner, project creator, or supervisor can delete assignments"
+                detail="Only assigner, project creator, supervisor, or a manager can delete assignments"
             )
         
         ProjectAssignmentRepository.delete(db=db, assignment=assignment)

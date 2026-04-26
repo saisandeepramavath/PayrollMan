@@ -3,12 +3,15 @@ Project Service - Business logic for projects
 """
 
 from typing import List, Optional
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from src.app.models.project import Project, ProjectStatus
-from src.app.schemas.project import ProjectCreate, ProjectUpdate
+from src.app.models.user import User
+from src.app.schemas.project import ProjectCreate, ProjectUpdate, ProjectWithDetails
 from src.app.repositories.project_repository import ProjectRepository
+from src.app.services.tracking_service import TrackingService
 
 
 class ProjectService:
@@ -67,6 +70,15 @@ class ProjectService:
             start_date=project_data.start_date,
             end_date=project_data.end_date
         )
+
+        if project_data.tracking_setup is not None:
+            TrackingService.create_category(
+                db=db,
+                creator_id=creator_id,
+                category_data=project_data.tracking_setup,
+                project_id=project.id,
+            )
+            db.refresh(project)
         
         return project
     
@@ -92,6 +104,30 @@ class ProjectService:
             List of projects
         """
         return ProjectRepository.get_all(db=db, status=status, department=department, skip=skip, limit=limit)
+
+    @staticmethod
+    def get_all_projects_enriched(
+        db: Session,
+        status: Optional[ProjectStatus] = None,
+        department: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[ProjectWithDetails]:
+        """Get all projects with creator/supervisor names and assignment counts"""
+        projects = ProjectRepository.get_all_with_details(
+            db=db, status=status, department=department, skip=skip, limit=limit
+        )
+        project_ids = [p.id for p in projects]
+        counts = ProjectRepository.get_assignment_counts(db, project_ids) if project_ids else {}
+
+        result = []
+        for p in projects:
+            detail = ProjectWithDetails.model_validate(p)
+            detail.creator_name = p.creator.full_name if p.creator else None
+            detail.supervisor_name = p.supervisor.full_name if p.supervisor else None
+            detail.assigned_users_count = counts.get(p.id, 0)
+            result.append(detail)
+        return result
     
     @staticmethod
     def get_project(db: Session, project_id: int) -> Project:
@@ -216,12 +252,21 @@ class ProjectService:
                 detail="Project not found"
             )
         
-        # Check permissions (only creator or supervisor can update)
-        if project.creator_id != user_id and project.supervisor_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only project creator or supervisor can update the project"
+        # Check permissions (creator, supervisor, or role with can_create_projects)
+        is_project_lead = (
+            project.creator_id == user_id or project.supervisor_id == user_id
+        )
+        if not is_project_lead:
+            user = db.query(User).filter(User.id == user_id).first()
+            has_role = user and (
+                user.is_superuser
+                or (user.role and user.role.can_create_projects)
             )
+            if not has_role:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only project creator, supervisor, or a manager can update the project"
+                )
         
         # Check code conflict if code is being changed
         if project_data.code and project_data.code != project.code:
@@ -251,7 +296,10 @@ class ProjectService:
     @staticmethod
     def delete_project(db: Session, project_id: int, user_id: int) -> None:
         """
-        Delete project (only creator can delete)
+        Archive project (only creator can delete).
+
+        Historical timecards and time allocations must remain intact, so this
+        operation marks the project as cancelled instead of physically deleting it.
         
         Args:
             db: Database session
@@ -269,14 +317,29 @@ class ProjectService:
                 detail="Project not found"
             )
         
-        # Only creator can delete
-        if project.creator_id != user_id:
+        # Only creator or manager can delete
+        is_creator = project.creator_id == user_id
+        user = db.query(User).filter(User.id == user_id).first()
+        is_manager = user and (
+            user.is_superuser or
+            (user.role and user.role.can_create_projects)
+        )
+        if not is_creator and not is_manager:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only project creator can delete the project"
+                detail="Only project creator or a manager can delete the project"
             )
-        
-        ProjectRepository.delete(db=db, project=project)
+
+        if project.status == ProjectStatus.CANCELLED:
+            return
+
+        archive_end_date = project.end_date or datetime.now(timezone.utc).replace(tzinfo=None)
+        ProjectRepository.update(
+            db=db,
+            project=project,
+            status=ProjectStatus.CANCELLED,
+            end_date=archive_end_date,
+        )
     
     @staticmethod
     def can_user_manage_project(db: Session, project_id: int, user_id: int) -> bool:

@@ -46,3 +46,28 @@ class ProjectAssignment(Base):
     user = relationship("User", foreign_keys=[user_id], back_populates="project_assignments")
     assigner = relationship("User", foreign_keys=[assigner_id], back_populates="assigned_projects")
     approver = relationship("User", foreign_keys=[approved_by_id], back_populates="approved_assignments")
+
+    # ── Computed properties for Pydantic serialisation ──
+    @property
+    def user_name(self) -> str | None:
+        return self.user.full_name if self.user else None
+
+    @property
+    def user_email(self) -> str | None:
+        return self.user.email if self.user else None
+
+    @property
+    def assigner_name(self) -> str | None:
+        return self.assigner.full_name if self.assigner else None
+
+    @property
+    def approver_name(self) -> str | None:
+        return self.approver.full_name if self.approver else None
+
+    @property
+    def project_name(self) -> str | None:
+        return self.project.name if self.project else None
+
+    @property
+    def project_code(self) -> str | None:
+        return self.project.code if self.project else None

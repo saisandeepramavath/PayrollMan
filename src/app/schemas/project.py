@@ -7,6 +7,8 @@ from datetime import datetime
 from typing import Optional
 from enum import Enum
 
+from src.app.schemas.tracking import TrackingCategoryCreate
+
 
 class ProjectStatusEnum(str, Enum):
     """Project status enum"""
@@ -25,12 +27,14 @@ class ProjectBase(BaseModel):
     company: Optional[str] = None
     supervisor_id: Optional[int] = None
     status: ProjectStatusEnum = ProjectStatusEnum.ACTIVE
+    requires_approval: bool = True
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
 
 
 class ProjectCreate(ProjectBase):
     """Project creation schema"""
+    tracking_setup: Optional[TrackingCategoryCreate] = None
     
     @field_validator('code')
     @classmethod
@@ -49,6 +53,7 @@ class ProjectUpdate(BaseModel):
     company: Optional[str] = None
     supervisor_id: Optional[int] = None
     status: Optional[ProjectStatusEnum] = None
+    requires_approval: Optional[bool] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
 

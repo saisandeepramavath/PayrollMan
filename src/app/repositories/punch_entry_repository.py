@@ -55,6 +55,13 @@ class PunchEntryRepository:
             PunchEntry.date >= start_date,
             PunchEntry.date <= end_date
         ).order_by(PunchEntry.date.desc(), PunchEntry.punch_in.desc()).all()
+
+    @staticmethod
+    def get_by_user(db: Session, user_id: int) -> List[PunchEntry]:
+        """Get all punch entries for a user."""
+        return db.query(PunchEntry).filter(
+            PunchEntry.user_id == user_id
+        ).order_by(PunchEntry.date.desc(), PunchEntry.punch_in.desc()).all()
     
     @staticmethod
     def create(

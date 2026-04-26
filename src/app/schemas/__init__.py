@@ -54,6 +54,33 @@ from src.app.schemas.time_allocation import (
     BulkTimeAllocationCreate,
     DailySummary,
 )
+from src.app.schemas.user_work_rule import (
+    UserEffectiveWorkRule,
+    UserWorkRuleCreate,
+    UserWorkRuleReorderRequest,
+    UserWorkRuleResponse,
+    UserWorkRuleUpdate,
+)
+from src.app.schemas.tracking import (
+    TrackingCategoryCreate,
+    TrackingCategoryResponse,
+    TrackingCategoryUpdate,
+    TrackingCodeCreate,
+    TrackingCodeResponse,
+    TrackingRuleCreate,
+    TrackingRuleResponse,
+)
+from src.app.schemas.issue_report import (
+    IssueReportCreate,
+    IssueReportNotice,
+    IssueReportResponse,
+    IssueReportUpdate,
+)
+from src.app.schemas.timecard_submission import (
+    TimecardSubmissionResponse,
+    TimecardSubmissionReviewRequest,
+    TimecardSubmissionSubmitRequest,
+)
 
 __all__ = [
     # User
@@ -101,4 +128,26 @@ __all__ = [
     "TimeAllocationWithProject",
     "BulkTimeAllocationCreate",
     "DailySummary",
+    # User work rules
+    "UserWorkRuleCreate",
+    "UserWorkRuleUpdate",
+    "UserWorkRuleResponse",
+    "UserWorkRuleReorderRequest",
+    "UserEffectiveWorkRule",
+    # Tracking
+    "TrackingCategoryCreate",
+    "TrackingCategoryResponse",
+    "TrackingCategoryUpdate",
+    "TrackingCodeCreate",
+    "TrackingCodeResponse",
+    "TrackingRuleCreate",
+    "TrackingRuleResponse",
+    # Issue reports
+    "IssueReportCreate",
+    "IssueReportNotice",
+    "IssueReportResponse",
+    "IssueReportUpdate",
+    "TimecardSubmissionResponse",
+    "TimecardSubmissionReviewRequest",
+    "TimecardSubmissionSubmitRequest",
 ]

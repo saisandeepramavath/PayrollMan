@@ -32,7 +32,20 @@ class UserInDB(UserBase):
     is_superuser: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserRoleInfo(BaseModel):
+    """Embedded role summary inside UserResponse"""
+    id: int
+    name: str
+    display_name: str
+    can_create_projects: bool
+    can_manage_assignments: bool
+    can_view_all_timecards: bool
+    can_manage_users: bool
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -42,6 +55,10 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     is_active: bool
+    is_superuser: bool
+    role_id: Optional[int] = None
+    role: Optional[UserRoleInfo] = None
     created_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
+

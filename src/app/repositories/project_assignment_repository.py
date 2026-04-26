@@ -74,18 +74,22 @@ class ProjectAssignmentRepository:
         return query.order_by(ProjectAssignment.created_at.desc()).all()
     
     @staticmethod
-    def get_pending_approvals(db: Session, approver_id: int) -> List[ProjectAssignment]:
-        """Get pending assignments for approval (project supervisor or creator)"""
-        return db.query(ProjectAssignment).options(
+    def get_pending_approvals(db: Session, approver_id: int, all_projects: bool = False) -> List[ProjectAssignment]:
+        """Get pending assignments for approval (project supervisor/creator, or all for managers)"""
+        query = db.query(ProjectAssignment).options(
             joinedload(ProjectAssignment.user),
             joinedload(ProjectAssignment.project),
             joinedload(ProjectAssignment.assigner)
-        ).join(
-            ProjectAssignment.project
         ).filter(
-            ProjectAssignment.status == AssignmentStatus.PENDING,
-            (Project.supervisor_id == approver_id) | (Project.creator_id == approver_id)
-        ).order_by(ProjectAssignment.created_at).all()
+            ProjectAssignment.status == AssignmentStatus.PENDING
+        )
+        if not all_projects:
+            query = query.join(
+                ProjectAssignment.project
+            ).filter(
+                (Project.supervisor_id == approver_id) | (Project.creator_id == approver_id)
+            )
+        return query.order_by(ProjectAssignment.created_at).all()
     
     @staticmethod
     def get_assigned_by_user(db: Session, assigner_id: int) -> List[ProjectAssignment]:

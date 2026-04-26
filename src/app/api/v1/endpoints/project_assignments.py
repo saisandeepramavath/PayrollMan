@@ -63,7 +63,7 @@ def get_pending_approvals(
     )
 
 
-@router.get("/project/{project_id}", response_model=List[ProjectAssignmentResponse])
+@router.get("/project/{project_id}", response_model=List[ProjectAssignmentWithDetails])
 def get_project_assignments(
     project_id: int,
     status_filter: Optional[AssignmentStatusEnum] = Query(None, alias="status", description="Filter by assignment status"),

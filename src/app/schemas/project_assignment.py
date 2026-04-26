@@ -51,15 +51,18 @@ class ProjectAssignmentResponse(ProjectAssignmentBase):
 class ProjectAssignmentWithDetails(ProjectAssignmentResponse):
     """Project assignment with user and project details"""
     user_name: Optional[str] = None
+    user_email: Optional[str] = None
     assigner_name: Optional[str] = None
     approver_name: Optional[str] = None
     project_name: Optional[str] = None
     project_code: Optional[str] = None
+    total_project_hours_since_assigned: Optional[float] = None
+    assigned_since: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
 
 
 class AssignmentApprovalRequest(BaseModel):
     """Assignment approval/rejection request"""
-    status: AssignmentStatusEnum  # Either APPROVED or REJECTED
+    status: Optional[AssignmentStatusEnum] = None
     notes: Optional[str] = None

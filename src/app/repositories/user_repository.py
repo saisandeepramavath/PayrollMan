@@ -2,7 +2,7 @@
 User Repository - Data access layer for User model
 """
 
-from typing import Optional
+from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from src.app.models.user import User
@@ -10,7 +10,12 @@ from src.app.models.user import User
 
 class UserRepository:
     """User data access repository"""
-    
+
+    @staticmethod
+    def get_all_active(db: Session) -> List[User]:
+        """Get all active users ordered by full name"""
+        return db.query(User).filter(User.is_active == True).order_by(User.full_name).all()
+
     @staticmethod
     def get_by_id(db: Session, user_id: int) -> Optional[User]:
         """Get user by ID"""

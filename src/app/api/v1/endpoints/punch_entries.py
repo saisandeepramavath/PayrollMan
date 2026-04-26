@@ -4,7 +4,7 @@ Punch Entry Endpoints
 
 from typing import List, Optional
 from datetime import date
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from src.app.db.session import get_db
@@ -78,13 +78,22 @@ def create_punch_entry(
 def get_punch_entries(
     start_date: Optional[date] = Query(None, description="Start date filter"),
     end_date: Optional[date] = Query(None, description="End date filter"),
+    user_id: Optional[int] = Query(None, description="Target user when allowed by role"),
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Get punch entries for current user"""
+    """Get punch entries for current user or another user if permitted."""
+    target_user_id = current_user.id
+    if user_id is not None and user_id != current_user.id:
+        if not current_user.is_superuser and not getattr(current_user.role, "can_view_all_timecards", False):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied: your role does not have 'can_view_all_timecards'"
+            )
+        target_user_id = user_id
     return PunchEntryService.get_user_punch_entries(
         db=db,
-        user_id=current_user.id,
+        user_id=target_user_id,
         start_date=start_date,
         end_date=end_date
     )

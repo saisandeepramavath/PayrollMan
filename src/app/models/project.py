@@ -39,6 +39,9 @@ class Project(Base):
     # Status
     status = Column(SQLEnum(ProjectStatus), default=ProjectStatus.ACTIVE, nullable=False)
     
+    # Assignment workflow
+    requires_approval = Column(Boolean, default=True, nullable=False)  # Whether joining needs approval
+    
     # Timestamps
     start_date = Column(DateTime(timezone=True))
     end_date = Column(DateTime(timezone=True))
@@ -50,3 +53,5 @@ class Project(Base):
     supervisor = relationship("User", foreign_keys=[supervisor_id], back_populates="supervised_projects")
     assignments = relationship("ProjectAssignment", back_populates="project", cascade="all, delete-orphan")
     time_allocations = relationship("TimeAllocation", back_populates="project", cascade="all, delete-orphan")
+    timecards = relationship("Timecard", back_populates="project")
+    tracking_categories = relationship("TrackingCategory", back_populates="project")

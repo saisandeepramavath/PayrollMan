@@ -4,9 +4,10 @@ Project Repository - Data access layer for Project model
 
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from src.app.models.project import Project, ProjectStatus
+from src.app.models.project_assignment import ProjectAssignment, AssignmentStatus
 
 
 class ProjectRepository:
@@ -77,6 +78,42 @@ class ProjectRepository:
             Project.company == company
         ).order_by(Project.name).all()
     
+    @staticmethod
+    def get_all_with_details(
+        db: Session,
+        status: Optional[ProjectStatus] = None,
+        department: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[Project]:
+        """Get all projects with creator/supervisor eagerly loaded"""
+        query = db.query(Project).options(
+            joinedload(Project.creator),
+            joinedload(Project.supervisor),
+        )
+
+        if status:
+            query = query.filter(Project.status == status)
+
+        if department:
+            query = query.filter(Project.department == department)
+
+        return query.order_by(Project.created_at.desc()).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def get_assignment_counts(db: Session, project_ids: List[int]) -> dict[int, int]:
+        """Get approved assignment counts for a list of projects"""
+        rows = (
+            db.query(ProjectAssignment.project_id, func.count(ProjectAssignment.id))
+            .filter(
+                ProjectAssignment.project_id.in_(project_ids),
+                ProjectAssignment.status == AssignmentStatus.APPROVED,
+            )
+            .group_by(ProjectAssignment.project_id)
+            .all()
+        )
+        return {pid: cnt for pid, cnt in rows}
+
     @staticmethod
     def search(db: Session, query: str) -> List[Project]:
         """Search projects by name, code, or description"""

@@ -4,7 +4,7 @@ Punch Entry Tests
 
 import pytest
 from fastapi.testclient import TestClient
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta, timezone
 
 
 def get_auth_token(client: TestClient, email: str = "test@example.com") -> str:
@@ -45,6 +45,25 @@ def test_punch_in_success(client: TestClient):
     assert data["punch_in"] is not None
     assert data["punch_out"] is None
     assert data["notes"] == "Starting work"
+
+
+def test_punch_in_uses_local_work_date_for_response(client: TestClient):
+    """Test quick punch-in keeps the local calendar day in the date field."""
+    token = get_auth_token(client, email="late-shift@example.com")
+
+    response = client.post(
+        "/api/v1/punch/in",
+        json={
+            "punch_in": "2026-04-16T23:30:00-05:00",
+            "notes": "Late shift"
+        },
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["date"] == "2026-04-16"
+    assert data["punch_in"] == "2026-04-17T04:30:00Z"
 
 
 def test_punch_in_already_active(client: TestClient):
@@ -200,6 +219,33 @@ def test_get_punch_entries(client: TestClient):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
+
+
+def test_get_punch_entries_includes_history_older_than_30_days(client: TestClient):
+    """Test unfiltered punch history includes entries older than 30 days."""
+    token = get_auth_token(client)
+    older_date = date.today() - timedelta(days=45)
+
+    client.post(
+        "/api/v1/punch/",
+        json={
+            "date": str(older_date),
+            "punch_in": f"{older_date}T09:00:00",
+            "punch_out": f"{older_date}T17:00:00",
+            "notes": "Older history"
+        },
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    response = client.get(
+        "/api/v1/punch/",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["date"] == str(older_date)
 
 
 def test_get_punch_entries_by_date(client: TestClient):
