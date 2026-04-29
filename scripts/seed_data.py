@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Seed database with rich multi-tenant, multi-user, multi-project sample data.
+Seed data with rich multi-tenant, multi-user, multi-project sample data.
 
 Three companies:
   - TechCorp Solutions   (manager: Sunil)        - 7 engineers, 7 projects
