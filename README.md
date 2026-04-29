@@ -6,7 +6,6 @@ Production-ready employee time tracking and payroll management platform with Fas
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19.2+-61dafb.svg)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0+-3178c6.svg)](https://www.typescriptlang.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
@@ -694,27 +693,3 @@ npm run dev -- --port 5174
 - Axios (HTTP client)
 
 ---
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch: git checkout -b feature/your-feature
-3. Commit changes: git commit -m 'Add feature'
-4. Push to branch: git push origin feature/your-feature
-5. Open Pull Request
-
----
-
-## License
-
-MIT License - See LICENSE file
-
----
-
-## Support
-
-- API Documentation: http://localhost:8000/api/v1/docs
-- Health Check: http://localhost:8000/health
-- Report Issues: Open GitHub issue
-
-Built with FastAPI, React, and Clean Architecture principles.
