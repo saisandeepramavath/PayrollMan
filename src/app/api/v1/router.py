@@ -22,6 +22,7 @@ from src.app.api.v1.endpoints import (
     roles,
     tracking,
     user_work_rules,
+    employee_onboarding,
 )
 
 api_router = APIRouter()
@@ -94,5 +95,12 @@ api_router.include_router(
     user_work_rules.router,
     prefix="/work-rules",
     tags=["📏 Work Rules"],
+    responses={401: {"description": "Unauthorized"}}
+)
+
+api_router.include_router(
+    employee_onboarding.router,
+    prefix="/onboarding",
+    tags=["👤 Employee Onboarding"],
     responses={401: {"description": "Unauthorized"}}
 )

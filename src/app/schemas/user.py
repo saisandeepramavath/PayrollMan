@@ -3,7 +3,7 @@ User Pydantic schemas
 """
 
 from pydantic import BaseModel, EmailStr, ConfigDict
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 
@@ -54,6 +54,13 @@ class UserResponse(BaseModel):
     id: int
     email: str
     full_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    personal_email: Optional[str] = None
+    office_phone: Optional[str] = None
+    personal_phone: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    additional_details: Optional[str] = None
     is_active: bool
     is_superuser: bool
     role_id: Optional[int] = None
@@ -61,4 +68,5 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
 

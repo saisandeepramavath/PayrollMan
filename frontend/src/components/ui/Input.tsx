@@ -1,5 +1,6 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -10,12 +11,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, helperText, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    const { colors } = useTheme();
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-medium text-slate-400 uppercase tracking-wide"
+            className={cn('text-xs font-medium uppercase tracking-wide', colors.input.label)}
           >
             {label}
           </label>
@@ -24,18 +26,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-lg border bg-slate-900 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500',
+            'w-full rounded-lg border px-3 py-2.5 text-sm',
             'transition-all duration-150',
             'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50',
+            colors.input.bg,
+            colors.input.text,
+            colors.input.placeholder,
             error
               ? 'border-rose-500/50 focus:ring-rose-500/30 focus:border-rose-500/50'
-              : 'border-slate-700 hover:border-slate-600',
+              : colors.input.border,
             className
           )}
           {...props}
         />
         {error && <p className="text-xs text-rose-400">{error}</p>}
-        {helperText && !error && <p className="text-xs text-slate-500">{helperText}</p>}
+        {helperText && !error && <p className={cn('text-xs', colors.input.helper)}>{helperText}</p>}
       </div>
     );
   }
@@ -50,12 +55,13 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, label, error, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    const { colors } = useTheme();
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-medium text-slate-400 uppercase tracking-wide"
+            className={cn('text-xs font-medium uppercase tracking-wide', colors.input.label)}
           >
             {label}
           </label>
@@ -64,12 +70,15 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-lg border bg-slate-900 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 resize-none',
+            'w-full rounded-lg border px-3 py-2.5 text-sm resize-none',
             'transition-all duration-150',
             'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50',
+            colors.input.bg,
+            colors.input.text,
+            colors.input.placeholder,
             error
               ? 'border-rose-500/50 focus:ring-rose-500/30 focus:border-rose-500/50'
-              : 'border-slate-700 hover:border-slate-600',
+              : colors.input.border,
             className
           )}
           {...props}
@@ -89,12 +98,13 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, label, error, id, children, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
+    const { colors } = useTheme();
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-medium text-slate-400 uppercase tracking-wide"
+            className={cn('text-xs font-medium uppercase tracking-wide', colors.input.label)}
           >
             {label}
           </label>
@@ -103,12 +113,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-lg border bg-slate-900 px-3 py-2.5 text-sm text-slate-100',
+            'w-full rounded-lg border px-3 py-2.5 text-sm',
             'transition-all duration-150 cursor-pointer',
             'focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50',
+            colors.input.bg,
+            colors.input.text,
             error
               ? 'border-rose-500/50 focus:ring-rose-500/30 focus:border-rose-500/50'
-              : 'border-slate-700 hover:border-slate-600',
+              : colors.input.border,
             className
           )}
           {...props}

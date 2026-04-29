@@ -26,15 +26,15 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_STYLES: Record<string, string> = {
-  low: 'text-slate-300 border-slate-600 bg-slate-800/60',
-  medium: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
-  high: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
+  low: 'text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/60',
+  medium: 'text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/10',
+  high: 'text-rose-700 dark:text-rose-300 border-rose-500/30 bg-rose-500/10',
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  open: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
-  in_review: 'text-sky-300 border-sky-500/30 bg-sky-500/10',
-  resolved: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
+  open: 'text-rose-700 dark:text-rose-300 border-rose-500/30 bg-rose-500/10',
+  in_review: 'text-sky-700 dark:text-sky-300 border-sky-500/30 bg-sky-500/10',
+  resolved: 'text-emerald-700 dark:text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
 };
 
 export function ReviewQueuePage() {
@@ -106,7 +106,7 @@ export function ReviewQueuePage() {
           <ShieldAlert className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Alerts</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Alerts</h1>
           <p className="text-sm text-slate-500">Review held or flagged submissions, open the related week, and resolve the blockers before approval.</p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export function ReviewQueuePage() {
         <Card>
           <CardHeader className="flex-col items-stretch gap-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-slate-200">Active Alerts</h2>
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Active Alerts</h2>
               <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | IssueReportStatus)} className="max-w-[180px]">
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -138,18 +138,18 @@ export function ReviewQueuePage() {
             {filteredIssues.length === 0 ? (
               <div className="px-6 py-10 text-center text-sm text-slate-500">No alerts match the current filter.</div>
             ) : (
-              <div className="divide-y divide-slate-800">
+              <div className="divide-y divide-slate-200 dark:divide-slate-800">
                 {filteredIssues.map((issue) => (
                   <button
                     key={issue.id}
                     type="button"
                     onClick={() => setSelectedIssueId(issue.id)}
-                    className={`w-full px-6 py-4 text-left transition-colors ${selectedIssue?.id === issue.id ? 'bg-slate-800/70' : 'hover:bg-slate-800/40'}`}
+                    className={`w-full px-6 py-4 text-left transition-colors ${selectedIssue?.id === issue.id ? 'bg-slate-100 dark:bg-slate-800/70' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-100 truncate">{issue.title}</p>
-                        <p className="mt-1 text-xs text-slate-400 truncate">{issue.user_name ?? issue.user_email ?? `User #${issue.user_id}`}</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{issue.title}</p>
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 truncate">{issue.user_name ?? issue.user_email ?? `User #${issue.user_id}`}</p>
                         <p className="mt-1 text-xs text-slate-500 line-clamp-2">{issue.description}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 shrink-0">
@@ -176,7 +176,7 @@ export function ReviewQueuePage() {
             <>
               <CardHeader>
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-100">{selectedIssue.title}</h2>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{selectedIssue.title}</h2>
                   <p className="mt-1 text-sm text-slate-500">Reported by {selectedIssue.reporter_name ?? selectedIssue.reporter_email ?? `User #${selectedIssue.reporter_id}`} for {selectedIssue.user_name ?? selectedIssue.user_email ?? `User #${selectedIssue.user_id}`}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export function ReviewQueuePage() {
 
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Issue details</p>
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300 whitespace-pre-wrap">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-300 whitespace-pre-wrap">
                     {selectedIssue.description}
                   </div>
                 </div>
@@ -205,9 +205,9 @@ export function ReviewQueuePage() {
                 {selectedIssue.notice_message && (
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Last notice</p>
-                    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                      <p className="text-sm font-semibold text-slate-200">{selectedIssue.notice_subject}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-400 whitespace-pre-wrap">{selectedIssue.notice_message}</p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{selectedIssue.notice_subject}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{selectedIssue.notice_message}</p>
                     </div>
                   </div>
                 )}
@@ -241,7 +241,7 @@ export function ReviewQueuePage() {
                   )}
                 </div>
 
-                <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Resolution</p>
                   <Textarea
                     label="Resolution notes"
@@ -308,9 +308,9 @@ export function ReviewQueuePage() {
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-sm font-medium text-slate-200">{value}</p>
+      <p className="mt-2 text-sm font-medium text-slate-800 dark:text-slate-200">{value}</p>
     </div>
   );
 }

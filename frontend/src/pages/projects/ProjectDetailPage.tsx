@@ -100,7 +100,7 @@ export function ProjectDetailPage() {
   });
 
   if (isLoading) return <PageLoader />;
-  if (!project) return <div className="text-slate-400 p-8">Project not found.</div>;
+  if (!project) return <div className="text-slate-600 dark:text-slate-400 p-8">Project not found.</div>;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -108,7 +108,7 @@ export function ProjectDetailPage() {
       <div className="mb-6">
         <Link
           to="/projects"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 mb-4 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-4 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to projects
         </Link>
@@ -121,7 +121,7 @@ export function ProjectDetailPage() {
               </span>
               <ProjectStatusBadge status={project.status as ProjectStatus} />
             </div>
-            <h1 className="text-2xl font-bold text-slate-100">{project.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{project.name}</h1>
             {project.description && (
               <p className="text-sm text-slate-500 mt-2 max-w-2xl leading-relaxed">
                 {project.description}
@@ -150,7 +150,7 @@ export function ProjectDetailPage() {
                   <Building2 className="w-4 h-4 text-slate-500" />
                   <div>
                     <p className="text-[10px] text-slate-600 uppercase tracking-wide">Department</p>
-                    <p className="text-sm font-medium text-slate-200 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
                       {project.department ?? '—'}
                     </p>
                   </div>
@@ -163,7 +163,7 @@ export function ProjectDetailPage() {
                   <Building2 className="w-4 h-4 text-slate-500" />
                   <div>
                     <p className="text-[10px] text-slate-600 uppercase tracking-wide">Company</p>
-                    <p className="text-sm font-medium text-slate-200 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
                       {project.company ?? '—'}
                     </p>
                   </div>
@@ -176,7 +176,7 @@ export function ProjectDetailPage() {
                   <Calendar className="w-4 h-4 text-slate-500" />
                   <div>
                     <p className="text-[10px] text-slate-600 uppercase tracking-wide">Created</p>
-                    <p className="text-sm font-medium text-slate-200 mt-0.5">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
                       {formatDate(project.created_at)}
                     </p>
                   </div>
@@ -188,8 +188,8 @@ export function ProjectDetailPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-slate-400" />
-                <h2 className="text-sm font-semibold text-slate-200">
+                <Users className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                   Team Assignments ({assignments?.length ?? 0})
                 </h2>
               </div>
@@ -206,13 +206,13 @@ export function ProjectDetailPage() {
                   <p className="text-xs text-slate-500">No assignments yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800">
+                <div className="divide-y divide-slate-200 dark:divide-slate-800">
                   {assignments.map((a) => (
                     <div key={a.id} className="px-6 py-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar name={(users ?? []).find(u => u.id === a.user_id)?.full_name ?? `User ${a.user_id}`} size="sm" />
                         <div>
-                          <p className="text-sm font-medium text-slate-200">
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                             {(users ?? []).find(u => u.id === a.user_id)?.full_name ?? `User #${a.user_id}`}
                           </p>
                           <div className="flex items-center gap-2 mt-0.5">
@@ -224,7 +224,7 @@ export function ProjectDetailPage() {
                             {typeof a.total_project_hours_since_assigned === 'number' && (
                               <>
                                 <span className="text-xs text-slate-700">·</span>
-                                <span className="text-xs text-indigo-300">
+                                <span className="text-xs text-indigo-700 dark:text-indigo-300">
                                   {a.total_project_hours_since_assigned.toFixed(1)}h since assignment
                                 </span>
                               </>
@@ -298,8 +298,8 @@ export function ProjectDetailPage() {
       {/* Archive confirmation */}
       <Modal isOpen={showDelete} onClose={() => setShowDelete(false)} title="Archive Project">
         <div className="flex flex-col gap-5">
-          <p className="text-sm text-slate-400">
-            Archive <span className="text-slate-200 font-semibold">{project.name}</span>? Existing timecards, allocations, and assignment history will be preserved, but the project will be marked as cancelled.
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Archive <span className="text-slate-800 dark:text-slate-200 font-semibold">{project.name}</span>? Existing timecards, allocations, and assignment history will be preserved, but the project will be marked as cancelled.
           </p>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowDelete(false)}>Cancel</Button>
@@ -430,8 +430,8 @@ function ProjectTrackingSidebar({
     <Card className="xl:sticky xl:top-6">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Layers3 className="w-4 h-4 text-slate-400" />
-          <h2 className="text-sm font-semibold text-slate-200">Tracking Setup</h2>
+          <Layers3 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Tracking Setup</h2>
         </div>
         <Select value={String(selectedCategoryId)} onChange={(e) => setSelectedCategoryId(e.target.value === 'new' ? 'new' : Number(e.target.value))}>
           {categories.map((category) => (
@@ -454,7 +454,7 @@ function ProjectTrackingSidebar({
             )}
           </div>
           {codes.map((code, index) => (
-            <div key={code.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-3 space-y-3">
+            <div key={code.id} className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-3 space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Code {index + 1}</p>
                 {canEdit && codes.length > 1 && (
@@ -584,7 +584,7 @@ function AssignUserForm({
         ))}
       </Select>
       {availableUsers.length === 0 && (
-        <p className="text-sm text-slate-400">All users are already assigned to this project.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">All users are already assigned to this project.</p>
       )}
       <Input label="Role" placeholder="e.g. Developer, Designer…" {...register('role')} />
       <div className="flex gap-3 justify-end pt-2">

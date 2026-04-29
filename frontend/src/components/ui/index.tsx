@@ -1,3 +1,6 @@
+import { cn } from '../../utils';
+import { useTheme } from '../../contexts/ThemeContext';
+
 interface EmptyStateProps {
   icon: React.ReactNode;
   title: string;
@@ -6,13 +9,15 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+  const { colors } = useTheme();
+
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 mb-4">
+      <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center mb-4', colors.bg.tertiary, colors.text.tertiary)}>
         {icon}
       </div>
-      <h3 className="text-sm font-semibold text-slate-300 mb-1">{title}</h3>
-      {description && <p className="text-xs text-slate-500 max-w-xs">{description}</p>}
+      <h3 className={cn('text-sm font-semibold mb-1', colors.text.primary)}>{title}</h3>
+      {description && <p className={cn('text-xs max-w-xs', colors.text.tertiary)}>{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

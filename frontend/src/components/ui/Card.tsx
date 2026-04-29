@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { cn } from '../../utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface CardProps {
   className?: string;
@@ -7,10 +8,15 @@ interface CardProps {
 }
 
 export function Card({ className, children }: CardProps) {
+  const { colors } = useTheme();
+  
   return (
     <div
       className={cn(
-        'rounded-xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm',
+        `rounded-xl border backdrop-blur-sm transition-colors duration-200`,
+        colors.card.bg,
+        colors.card.border,
+        colors.card.hover,
         className
       )}
     >
@@ -20,8 +26,14 @@ export function Card({ className, children }: CardProps) {
 }
 
 export function CardHeader({ className, children }: CardProps) {
+  const { theme } = useTheme();
+  
   return (
-    <div className={cn('flex items-center justify-between px-6 py-5 border-b border-slate-800', className)}>
+    <div className={cn(
+      `flex items-center justify-between px-6 py-5 border-b transition-colors duration-200`,
+      theme === 'dark' ? 'border-slate-700' : 'border-slate-200',
+      className
+    )}>
       {children}
     </div>
   );
@@ -41,13 +53,15 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, icon, trend, accent = 'text-indigo-400', className }: StatCardProps) {
+  const { colors } = useTheme();
+  
   return (
-    <Card className={cn('group hover:border-slate-700 transition-colors duration-200', className)}>
+    <Card className={cn('group transition-colors duration-200', colors.card.hover, className)}>
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</span>
-            <span className="text-2xl font-bold text-slate-100">{value}</span>
+            <span className={`text-xs font-medium uppercase tracking-wider ${colors.text.tertiary}`}>{label}</span>
+            <span className={`text-2xl font-bold ${colors.text.primary}`}>{value}</span>
             {trend && (
               <span
                 className={cn(
@@ -61,7 +75,8 @@ export function StatCard({ label, value, icon, trend, accent = 'text-indigo-400'
           </div>
           <div
             className={cn(
-              'flex items-center justify-center w-11 h-11 rounded-xl bg-slate-800 group-hover:scale-105 transition-transform duration-200',
+              'flex items-center justify-center w-11 h-11 rounded-xl group-hover:scale-105 transition-transform duration-200',
+              colors.bg.secondary,
               accent
             )}
           >

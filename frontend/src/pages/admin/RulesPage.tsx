@@ -52,23 +52,19 @@ export function RulesPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Rules Board</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Rules Board</h1>
         <p className="text-sm text-slate-500 mt-1">
           Manage work-hour policies per user and configure project tracking categories &amp; codes.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl border border-slate-800 bg-slate-900/60 p-1 w-fit">
+      <div className="flex gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-1 w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              activeTab === tab.key
-                ? 'bg-indigo-500/15 text-indigo-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-            }`}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${ activeTab === tab.key ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60' }`}
           >
             {tab.icon}
             {tab.label}
@@ -198,15 +194,15 @@ function WorkRulesTab() {
       {/* Left: User picker */}
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <Users className="w-4 h-4 text-slate-400" /> Users
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <Users className="w-4 h-4 text-slate-600 dark:text-slate-400" /> Users
           </h2>
         </CardHeader>
         <CardBody className="space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
             <input
-              className="w-full rounded-lg border border-slate-800 bg-slate-900/60 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder-slate-600 focus:border-indigo-500/40 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 py-2 pl-9 pr-3 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-600 focus:border-indigo-500/40 focus:outline-none"
               placeholder="Search users…"
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
@@ -217,11 +213,7 @@ function WorkRulesTab() {
               <button
                 key={user.id}
                 onClick={() => setSelectedUserId(user.id)}
-                className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                  user.id === selectedUserId
-                    ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-200'
-                    : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
-                }`}
+                className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${ user.id === selectedUserId ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-700 dark:text-indigo-200' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900' }`}
               >
                 <p className="text-sm font-medium leading-tight">{user.full_name}</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">{user.email}</p>
@@ -234,10 +226,10 @@ function WorkRulesTab() {
       {/* Right: Rules content */}
       <div className="space-y-5">
         {/* Effective summary strip */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-slate-200">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {selectedUser ? `${selectedUser.full_name}'s Policy` : 'Select a user'}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">Effective rule summary computed from the priority stack</p>
@@ -254,12 +246,12 @@ function WorkRulesTab() {
               <EffectiveStat label="Target Weekly" value={effectiveRule?.target_weekly_hours} unit="h" color="text-sky-300" bg="bg-sky-500/10 border-sky-500/20" />
               <EffectiveStat label="Max Weekly" value={effectiveRule?.max_weekly_hours} unit="h" color="text-amber-300" bg="bg-amber-500/10 border-amber-500/20" />
               <EffectiveStat label="Max Daily" value={effectiveRule?.max_daily_hours} unit="h" color="text-rose-300" bg="bg-rose-500/10 border-rose-500/20" />
-              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/50 p-3">
                 <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Applied Rules</p>
                 <div className="flex flex-wrap gap-1">
                   {(effectiveRule?.applied_rule_names ?? []).length ? (
                     effectiveRule!.applied_rule_names.map((n) => (
-                      <span key={n} className="rounded-md bg-slate-800 border border-slate-700 px-2 py-0.5 text-[10px] text-slate-300">{n}</span>
+                      <span key={n} className="rounded-md bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-[10px] text-slate-700 dark:text-slate-300">{n}</span>
                     ))
                   ) : (
                     <span className="text-[10px] text-slate-600">No active rules</span>
@@ -274,15 +266,15 @@ function WorkRulesTab() {
         <Card>
           <CardHeader>
             <div>
-              <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-slate-400" /> Rule Stack
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-slate-600 dark:text-slate-400" /> Rule Stack
               </h2>
               <p className="text-xs text-slate-500 mt-1">Drag to reorder — highest priority wins first.</p>
             </div>
           </CardHeader>
           <CardBody className="space-y-2">
             {(rules ?? []).length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-800 px-4 py-10 text-center text-sm text-slate-500">
+              <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 px-4 py-10 text-center text-sm text-slate-500">
                 No custom rules for this user. Click &ldquo;Add Rule&rdquo; to create one.
               </div>
             ) : (
@@ -293,12 +285,12 @@ function WorkRulesTab() {
                   onDragStart={() => setDraggedId(rule.id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(rule.id)}
-                  className="group rounded-xl border border-slate-800 bg-slate-900/70 hover:border-slate-700 transition-colors"
+                  className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/70 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                 >
                   <div className="flex items-center gap-3 p-3">
                     {/* Drag handle + priority badge */}
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="cursor-grab active:cursor-grabbing rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-500 hover:text-slate-300">
+                      <div className="cursor-grab active:cursor-grabbing rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
                         <GripVertical className="w-3.5 h-3.5" />
                       </div>
                       <span className="w-6 h-6 rounded-md bg-indigo-500/15 text-indigo-300 text-[10px] font-bold flex items-center justify-center">
@@ -308,7 +300,7 @@ function WorkRulesTab() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-100 truncate">{rule.name}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{rule.name}</p>
                       <p className="text-[11px] text-slate-500">
                         From {rule.effective_from}
                         {rule.notes && <span className="ml-2 text-slate-600">&middot; {rule.notes}</span>}
@@ -326,9 +318,7 @@ function WorkRulesTab() {
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => toggleMutation.mutate({ id: rule.id, is_active: !rule.is_active })}
-                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors ${
-                          rule.is_active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-500'
-                        }`}
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors ${ rule.is_active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-500' }`}
                       >
                         {rule.is_active ? 'Active' : 'Off'}
                       </button>
@@ -413,15 +403,15 @@ function TrackingConfigTab() {
       {/* Left: Project picker */}
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <FolderKanban className="w-4 h-4 text-slate-400" /> Projects
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <FolderKanban className="w-4 h-4 text-slate-600 dark:text-slate-400" /> Projects
           </h2>
         </CardHeader>
         <CardBody className="space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
             <input
-              className="w-full rounded-lg border border-slate-800 bg-slate-900/60 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder-slate-600 focus:border-indigo-500/40 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 py-2 pl-9 pr-3 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-600 focus:border-indigo-500/40 focus:outline-none"
               placeholder="Search projects…"
               value={projectSearch}
               onChange={(e) => setProjectSearch(e.target.value)}
@@ -430,11 +420,7 @@ function TrackingConfigTab() {
           <div className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1">
             <button
               onClick={() => setSelectedProjectId(null)}
-              className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                selectedProjectId === null
-                  ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-200'
-                  : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
-              }`}
+              className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${ selectedProjectId === null ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-700 dark:text-indigo-200' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900' }`}
             >
               <p className="text-sm font-medium">All Projects</p>
               <p className="text-[11px] text-slate-500 mt-0.5">Show all tracking categories</p>
@@ -443,14 +429,10 @@ function TrackingConfigTab() {
               <button
                 key={proj.id}
                 onClick={() => setSelectedProjectId(proj.id)}
-                className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                  proj.id === selectedProjectId
-                    ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-200'
-                    : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
-                }`}
+                className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${ proj.id === selectedProjectId ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-700 dark:text-indigo-200' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900' }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">{proj.code}</span>
+                  <span className="text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded">{proj.code}</span>
                   <p className="text-sm font-medium truncate">{proj.name}</p>
                 </div>
                 {proj.department && <p className="text-[11px] text-slate-500 mt-0.5">{proj.department}</p>}
@@ -465,7 +447,7 @@ function TrackingConfigTab() {
         {/* Header bar */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-slate-200">
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
               {selectedProjectId
                 ? `Tracking — ${(projects ?? []).find((p) => p.id === selectedProjectId)?.name ?? ''}`
                 : 'All Tracking Categories'}
@@ -482,7 +464,7 @@ function TrackingConfigTab() {
         {categoriesLoading ? (
           <PageLoader />
         ) : (categories ?? []).length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 px-6 py-14 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 px-6 py-14 text-center">
             <Settings2 className="w-8 h-8 text-slate-700 mx-auto mb-3" />
             <p className="text-sm text-slate-500">No tracking categories{selectedProjectId ? ' for this project' : ''} yet.</p>
             <p className="text-xs text-slate-600 mt-1">Click &ldquo;New Category&rdquo; to create one.</p>
@@ -517,7 +499,7 @@ function TrackingConfigTab() {
           isOpen
           onClose={() => setEditingCategory(null)}
           projects={projects ?? []}
-          defaultProjectId={editingCategory.project_id}
+          defaultProjectId={editingCategory.project_id ?? null}
           existingCategory={editingCategory}
           onSuccess={invalidateCategories}
         />
@@ -545,14 +527,14 @@ function CategoryCard({
   const activeRules = (category.rules ?? []).filter((r) => r.is_active !== false);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-colors hover:border-slate-700">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 overflow-hidden transition-colors hover:border-slate-300 dark:hover:border-slate-700">
       {/* Header row */}
       <button onClick={onToggle} className="w-full flex items-center gap-3 p-4 text-left">
         <div className="rounded-lg bg-indigo-500/10 border border-indigo-500/20 p-2">
           <BookOpen className="w-4 h-4 text-indigo-300" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-100 truncate">{category.name}</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{category.name}</p>
           <p className="text-[11px] text-slate-500 mt-0.5 truncate">
             {category.description || 'No description'}
             {category.company && <span className="ml-2 text-slate-600">&middot; {category.company}</span>}
@@ -563,7 +545,7 @@ function CategoryCard({
           <StatBadge icon={<Tag className="w-3 h-3" />} count={activeRules.length} label="rules" color="violet" />
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="rounded-lg p-1.5 text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+            className="rounded-lg p-1.5 text-slate-600 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -577,7 +559,7 @@ function CategoryCard({
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="border-t border-slate-800 px-4 pb-4">
+        <div className="border-t border-slate-200 dark:border-slate-800 px-4 pb-4">
           {/* Codes table */}
           <div className="mt-4">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
@@ -589,7 +571,7 @@ function CategoryCard({
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800">
+                    <tr className="border-b border-slate-200 dark:border-slate-800">
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Code</th>
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Label</th>
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Type</th>
@@ -601,15 +583,13 @@ function CategoryCard({
                     {(category.codes ?? []).map((code, i) => (
                       <tr key={code.id ?? i} className="border-b border-slate-800/50 last:border-0">
                         <td className="py-2 pr-3">
-                          <span className="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-slate-200">{code.code}</span>
+                          <span className="font-mono bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-800 dark:text-slate-200">{code.code}</span>
                         </td>
-                        <td className="py-2 pr-3 text-slate-300">{code.label}</td>
-                        <td className="py-2 pr-3 text-slate-400">{code.entry_type}</td>
-                        <td className="py-2 pr-3 text-slate-400">{code.labor_category || '—'}</td>
+                        <td className="py-2 pr-3 text-slate-700 dark:text-slate-300">{code.label}</td>
+                        <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">{code.entry_type}</td>
+                        <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">{code.labor_category || '—'}</td>
                         <td className="py-2">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                            code.is_active !== false ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-500'
-                          }`}>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${ code.is_active !== false ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-500' }`}>
                             {code.is_active !== false ? 'Active' : 'Inactive'}
                           </span>
                         </td>
@@ -632,7 +612,7 @@ function CategoryCard({
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800">
+                    <tr className="border-b border-slate-200 dark:border-slate-800">
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Name</th>
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Scope</th>
                       <th className="text-left py-2 pr-3 text-slate-500 font-medium">Condition</th>
@@ -643,20 +623,20 @@ function CategoryCard({
                   <tbody>
                     {(category.rules ?? []).map((rule, i) => (
                       <tr key={rule.id ?? i} className="border-b border-slate-800/50 last:border-0">
-                        <td className="py-2 pr-3 text-slate-200 font-medium">{rule.name}</td>
-                        <td className="py-2 pr-3 text-slate-400">
-                          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">{rule.scope_type}</span>
+                        <td className="py-2 pr-3 text-slate-800 dark:text-slate-200 font-medium">{rule.name}</td>
+                        <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">
+                          <span className="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">{rule.scope_type}</span>
                           {rule.scope_value && <span className="ml-1 text-slate-500">{rule.scope_value}</span>}
                         </td>
-                        <td className="py-2 pr-3 text-slate-400">
-                          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">{rule.condition_type}</span>
+                        <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">
+                          <span className="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">{rule.condition_type}</span>
                           <span className="ml-1 text-slate-500">{rule.condition_value}</span>
                         </td>
-                        <td className="py-2 pr-3 text-slate-400">
+                        <td className="py-2 pr-3 text-slate-600 dark:text-slate-400">
                           <span className="bg-violet-500/15 text-violet-300 px-1.5 py-0.5 rounded text-[10px]">{rule.action_type}</span>
                           <span className="ml-1 text-slate-500">{rule.action_value}</span>
                         </td>
-                        <td className="py-2 text-slate-400">{rule.priority ?? '—'}</td>
+                        <td className="py-2 text-slate-600 dark:text-slate-400">{rule.priority ?? '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -790,7 +770,7 @@ function CategoryFormModal({
         {/* Codes section */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Code2 className="w-3.5 h-3.5 text-sky-400" /> Tracking Codes ({codes.length})
             </p>
             <button onClick={addCode} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
@@ -802,7 +782,7 @@ function CategoryFormModal({
           ) : (
             <div className="space-y-2">
               {codes.map((code, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                <div key={idx} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-3">
                   <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
                     <Input label="Code" value={code.code} onChange={(e) => updateCode(idx, 'code', e.target.value)} placeholder="REG" />
                     <Input label="Label" value={code.label} onChange={(e) => updateCode(idx, 'label', e.target.value)} placeholder="Regular Hours" />
@@ -830,7 +810,7 @@ function CategoryFormModal({
         {/* Rules section */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-violet-400" /> Tracking Rules ({rules.length})
             </p>
             <button onClick={addRule} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
@@ -842,7 +822,7 @@ function CategoryFormModal({
           ) : (
             <div className="space-y-2">
               {rules.map((rule, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
+                <div key={idx} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-3">
                   <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
                     <Input label="Rule name" value={rule.name} onChange={(e) => updateRule(idx, 'name', e.target.value)} placeholder="e.g. OT threshold" />
                     <button onClick={() => removeRule(idx)} className="mb-1 p-2 rounded-lg text-slate-600 hover:text-rose-400 hover:bg-rose-500/10">
@@ -886,7 +866,7 @@ function CategoryFormModal({
       </div>
 
       {/* Footer buttons */}
-      <div className="flex gap-3 justify-end pt-4 mt-4 border-t border-slate-800">
+      <div className="flex gap-3 justify-end pt-4 mt-4 border-t border-slate-200 dark:border-slate-800">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
         <Button onClick={handleSubmit} isLoading={isPending}>
           {isEdit ? <><Pencil className="w-3.5 h-3.5" /> Update Category</> : <><Plus className="w-3.5 h-3.5" /> Create Category</>}
@@ -911,9 +891,9 @@ function EffectiveStat({ label, value, unit, color, bg }: { label: string; value
 
 function MiniTag({ label, value }: { label: string; value?: number }) {
   return (
-    <span className="inline-flex items-center gap-1 text-slate-400">
+    <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400">
       <span className="text-[10px] text-slate-600">{label}</span>
-      <span className="text-xs font-semibold text-slate-300">{value != null ? `${value}h` : '—'}</span>
+      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{value != null ? `${value}h` : '—'}</span>
     </span>
   );
 }

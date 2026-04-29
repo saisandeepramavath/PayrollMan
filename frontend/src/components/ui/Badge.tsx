@@ -1,6 +1,7 @@
 import { cn } from '../../utils';
 import type { ProjectStatus, AssignmentStatus } from '../../types';
 import { PROJECT_STATUS_CONFIG, ASSIGNMENT_STATUS_CONFIG } from '../../utils';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -8,10 +9,13 @@ interface BadgeProps {
 }
 
 export function Badge({ children, className }: BadgeProps) {
+  const { colors } = useTheme();
+
   return (
     <span
       className={cn(
         'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border',
+        colors.pill.neutral,
         className
       )}
     >
@@ -35,8 +39,8 @@ export function UserRoleBadge({ isAdmin }: { isAdmin: boolean }) {
     <Badge
       className={
         isAdmin
-          ? 'text-violet-400 bg-violet-400/10 border-violet-400/20'
-          : 'text-slate-400 bg-slate-400/10 border-slate-700'
+          ? 'text-violet-700 dark:text-violet-300 bg-violet-500/10 border-violet-500/25'
+          : 'text-slate-700 dark:text-slate-300 bg-slate-500/10 border-slate-400/30 dark:border-slate-600'
       }
     >
       {isAdmin ? 'Admin' : 'Member'}

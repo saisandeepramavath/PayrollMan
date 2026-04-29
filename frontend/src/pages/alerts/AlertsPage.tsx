@@ -7,18 +7,17 @@ import { Card, CardBody, CardHeader, StatCard } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { PageLoader } from '../../components/ui';
 import { formatDate, formatDateTime, timeAgo } from '../../utils';
-import type { IssueReportStatus } from '../../types';
 
 const STATUS_STYLES: Record<string, string> = {
-  open: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
-  in_review: 'text-sky-300 border-sky-500/30 bg-sky-500/10',
-  resolved: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
+  open: 'text-rose-700 dark:text-rose-300 border-rose-500/30 bg-rose-500/10',
+  in_review: 'text-sky-700 dark:text-sky-300 border-sky-500/30 bg-sky-500/10',
+  resolved: 'text-emerald-700 dark:text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
 };
 
 const PRIORITY_STYLES: Record<string, string> = {
-  low: 'text-slate-300 border-slate-600 bg-slate-800/60',
-  medium: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
-  high: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
+  low: 'text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800/60',
+  medium: 'text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/10',
+  high: 'text-rose-700 dark:text-rose-300 border-rose-500/30 bg-rose-500/10',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -53,7 +52,7 @@ export function AlertsPage() {
           <Bell className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">My Alerts</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Alerts</h1>
           <p className="text-sm text-slate-500">Track issues raised on your timecards, see manager notices, and jump into the related week to fix them.</p>
         </div>
       </div>
@@ -67,17 +66,17 @@ export function AlertsPage() {
       <Card>
         <CardHeader>
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Active Alerts</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Active Alerts</h2>
             <p className="mt-1 text-sm text-slate-500">Open items stay here until your reviewer resolves them.</p>
           </div>
         </CardHeader>
         <CardBody className="space-y-4">
           {issues?.length ? (
             (activeIssues.length > 0 ? activeIssues : issues).map((issue) => (
-              <div key={issue.id} className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+              <div key={issue.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-100">{issue.title}</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{issue.title}</h3>
                     <p className="mt-1 text-xs text-slate-500">
                       {TYPE_LABELS[issue.issue_type] ?? issue.issue_type} • {timeAgo(issue.created_at)}
                     </p>
@@ -92,7 +91,7 @@ export function AlertsPage() {
                   </div>
                 </div>
 
-                <p className="mt-3 text-sm leading-6 text-slate-300 whitespace-pre-wrap">{issue.description}</p>
+                <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{issue.description}</p>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                   <Info label="Week Of" value={issue.week_start ? formatDate(issue.week_start) : 'Not linked'} />
@@ -101,9 +100,9 @@ export function AlertsPage() {
 
                 {issue.notice_message && (
                   <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">Manager Notice</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-100">{issue.notice_subject ?? 'Alert notice'}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300 whitespace-pre-wrap">{issue.notice_message}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-200">Manager Notice</p>
+                    <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{issue.notice_subject ?? 'Alert notice'}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{issue.notice_message}</p>
                   </div>
                 )}
 
@@ -147,9 +146,9 @@ export function AlertsPage() {
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-sm text-slate-200">{value}</p>
+      <p className="mt-1 text-sm text-slate-800 dark:text-slate-200">{value}</p>
     </div>
   );
 }

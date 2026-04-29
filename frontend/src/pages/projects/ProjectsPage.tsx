@@ -109,7 +109,7 @@ export function ProjectsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Projects</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Projects</h1>
           <p className="text-sm text-slate-500 mt-0.5">{projects?.length ?? 0} total</p>
         </div>
         {canCreateProjects && (
@@ -122,24 +122,16 @@ export function ProjectsPage() {
 
       {/* Tabs for managers */}
       {canManageAssignments && (
-        <div className="flex gap-1 mb-5 bg-slate-900 rounded-lg p-1 border border-slate-800 w-fit">
+        <div className="flex gap-1 mb-5 bg-slate-100 dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-800 w-fit">
           <button
             onClick={() => setActiveTab('projects')}
-            className={`px-4 py-2 text-sm rounded-md transition-all ${
-              activeTab === 'projects'
-                ? 'bg-indigo-500/20 text-indigo-300 font-medium'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`px-4 py-2 text-sm rounded-md transition-all ${ activeTab === 'projects' ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }`}
           >
             All Projects
           </button>
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 text-sm rounded-md transition-all flex items-center gap-2 ${
-              activeTab === 'pending'
-                ? 'bg-amber-500/20 text-amber-300 font-medium'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`px-4 py-2 text-sm rounded-md transition-all flex items-center gap-2 ${ activeTab === 'pending' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-medium' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }`}
           >
             Pending Approvals
             {(pendingApprovals?.length ?? 0) > 0 && (
@@ -169,7 +161,7 @@ export function ProjectsPage() {
                       <UserPlus className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-100">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                         {assignment.user_name || assignment.user_email || `User #${assignment.user_id}`}
                       </p>
                       <p className="text-xs text-slate-500">
@@ -217,13 +209,13 @@ export function ProjectsPage() {
                 placeholder="Search projects…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all hover:border-slate-600"
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all hover:border-slate-600"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer min-w-[160px]"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer min-w-[160px]"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -244,11 +236,7 @@ export function ProjectsPage() {
               <button
                 key={key}
                 onClick={() => setProjectFilter(key)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all ${
-                  projectFilter === key
-                    ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
-                }`}
+                className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all ${ projectFilter === key ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/30' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700' }`}
               >
                 {label}
               </button>
@@ -305,7 +293,7 @@ export function ProjectsPage() {
       {/* Delete confirmation */}
       <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} title="Delete Project">
         <div className="flex flex-col gap-5">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             This action cannot be undone. All data associated with this project will be permanently
             removed.
           </p>
@@ -349,10 +337,10 @@ function ProjectCard({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const assignmentStatusLabel: Record<string, { text: string; color: string; icon: React.ReactNode }> = {
-    approved: { text: 'Assigned', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: <CheckCircle2 className="w-3 h-3" /> },
-    pending: { text: 'Pending Approval', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: <Clock className="w-3 h-3" /> },
-    rejected: { text: 'Rejected', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20', icon: <XCircle className="w-3 h-3" /> },
-    revoked: { text: 'Revoked', color: 'text-slate-400 bg-slate-400/10 border-slate-400/20', icon: <XCircle className="w-3 h-3" /> },
+    approved: { text: 'Assigned', color: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/25', icon: <CheckCircle2 className="w-3 h-3" /> },
+    pending: { text: 'Pending Approval', color: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/25', icon: <Clock className="w-3 h-3" /> },
+    rejected: { text: 'Rejected', color: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/25', icon: <XCircle className="w-3 h-3" /> },
+    revoked: { text: 'Revoked', color: 'text-slate-600 dark:text-slate-400 bg-slate-400/10 border-slate-400/20', icon: <XCircle className="w-3 h-3" /> },
   };
 
   const canRequestJoin =
@@ -366,7 +354,7 @@ function ProjectCard({
     project.status === 'active';
 
   return (
-    <Card className="group hover:border-slate-700 transition-all duration-200">
+    <Card className="group hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200">
       <div className="p-5 flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
           <div className="flex flex-col min-w-0 flex-1">
@@ -375,11 +363,11 @@ function ProjectCard({
                 {project.code}
               </span>
               {project.requires_approval ? (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1 text-amber-400 bg-amber-400/10 border-amber-400/20">
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1 text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/25">
                   <Lock className="w-2.5 h-2.5" /> Approval
                 </span>
               ) : (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1 text-emerald-400 bg-emerald-400/10 border-emerald-400/20">
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/25">
                   <LockOpen className="w-2.5 h-2.5" /> Open
                 </span>
               )}
@@ -390,20 +378,20 @@ function ProjectCard({
                 </span>
               )}
             </div>
-            <h3 className="text-sm font-semibold text-slate-100 truncate">{project.name}</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{project.name}</h3>
           </div>
           <div className="relative ml-2">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
             >
               <MoreVertical className="w-4 h-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 z-10 min-w-[140px] rounded-xl border border-slate-800 bg-slate-950 shadow-xl py-1">
+              <div className="absolute right-0 top-8 z-10 min-w-[140px] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl py-1">
                 <Link
                   to={`/projects/${project.id}`}
-                  className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   <Eye className="w-3.5 h-3.5" /> View details
@@ -412,7 +400,7 @@ function ProjectCard({
                   <>
                     <Link
                       to={`/projects/${project.id}/edit`}
-                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
                       onClick={() => setMenuOpen(false)}
                     >
                       <Pencil className="w-3.5 h-3.5" /> Edit
@@ -438,28 +426,28 @@ function ProjectCard({
 
         {/* Creator / Supervisor / Members info */}
         <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             <User className="w-3 h-3 text-slate-600" />
             <span className="text-slate-600">Created by</span>
-            <span className="text-slate-300 font-medium">{project.creator_name ?? 'Unknown'}</span>
+            <span className="text-slate-700 dark:text-slate-300 font-medium">{project.creator_name ?? 'Unknown'}</span>
             {isCreator && <span className="text-indigo-400 text-[10px]">(you)</span>}
           </div>
           {(project.supervisor_name || project.supervisor_id) && (
-            <div className="flex items-center gap-2 text-xs text-slate-400">
+            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
               <Shield className="w-3 h-3 text-slate-600" />
               <span className="text-slate-600">Supervisor</span>
-              <span className="text-slate-300 font-medium">{project.supervisor_name ?? 'Unknown'}</span>
+              <span className="text-slate-700 dark:text-slate-300 font-medium">{project.supervisor_name ?? 'Unknown'}</span>
               {isSupervisor && <span className="text-indigo-400 text-[10px]">(you)</span>}
             </div>
           )}
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             <Users className="w-3 h-3 text-slate-600" />
             <span className="text-slate-600">Members</span>
-            <span className="text-slate-300 font-medium">{project.assigned_users_count ?? 0}</span>
+            <span className="text-slate-700 dark:text-slate-300 font-medium">{project.assigned_users_count ?? 0}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-800">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-slate-800">
           <div className="flex flex-col gap-0.5">
             {project.department && (
               <span className="text-[10px] text-slate-600 uppercase tracking-wide">
@@ -705,10 +693,10 @@ function CreateProjectForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="mb-1 flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
+      <div className="mb-1 flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Setup Flow</p>
-          <p className="mt-1 text-sm text-slate-300">
+          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
             {step === 0 ? 'Create project' : step === 1 ? 'Attach category and grouped codes' : 'Define starter rules'}
           </p>
         </div>
@@ -758,15 +746,15 @@ function CreateProjectForm({
             />
           </div>
           <div className="col-span-2">
-            <label className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
+            <label className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-3">
               <input
                 type="checkbox"
                 checked={requiresApproval}
                 onChange={(e) => setRequiresApproval(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-500"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-indigo-500"
               />
               <div>
-                <p className="text-sm font-medium text-slate-200">Require approval to join</p>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Require approval to join</p>
                 <p className="mt-1 text-xs text-slate-500">
                   {requiresApproval
                     ? 'Users must request access and wait for manager approval before joining this project.'
@@ -780,15 +768,15 @@ function CreateProjectForm({
 
       {step === 1 && (
         <div className="space-y-4">
-          <label className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
+          <label className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-3">
             <input
               type="checkbox"
               checked={setupTracking}
               onChange={(e) => setSetupTracking(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-500"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-indigo-500"
             />
             <div>
-              <p className="text-sm font-medium text-slate-200">Create tracking category after project creation</p>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Create tracking category after project creation</p>
               <p className="mt-1 text-xs text-slate-500">
                 This creates the parent group users will see first, then the child tracking codes underneath it.
               </p>
@@ -821,10 +809,10 @@ function CreateProjectForm({
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-200">Tracking codes</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Tracking codes</p>
                     <p className="text-xs text-slate-500">These will be grouped automatically under the category above.</p>
                   </div>
                   <Button type="button" variant="secondary" size="sm" onClick={() => setTrackingCodes((current) => [...current, createCodeDraft(current.length)])}>
@@ -834,7 +822,7 @@ function CreateProjectForm({
 
                 <div className="space-y-3">
                   {trackingCodes.map((code, index) => (
-                    <div key={code.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                    <div key={code.id} className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-3">
                       <div className="mb-3 flex items-center justify-between">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Code {index + 1}</p>
                         {trackingCodes.length > 1 && (
@@ -876,10 +864,10 @@ function CreateProjectForm({
                           onChange={(e) => updateCode(code.id, 'description', e.target.value)}
                           placeholder="Optional helper text"
                         />
-                        <div className="col-span-2 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+                        <div className="col-span-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-900/50 p-3">
                           <div className="mb-3 flex items-center justify-between">
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Additional fields</p>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Additional fields</p>
                               <p className="text-[11px] text-slate-500">Add any extra metadata you want to attach to this code.</p>
                             </div>
                             <Button type="button" variant="secondary" size="sm" onClick={() => addCodeExtraField(code.id)}>
@@ -907,7 +895,7 @@ function CreateProjectForm({
                                   <div className="flex items-end">
                                     <button
                                       type="button"
-                                      className="mb-1 rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-300"
+                                      className="mb-1 rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-700 dark:text-rose-300"
                                       onClick={() => removeCodeExtraField(code.id, field.id)}
                                     >
                                       Remove
@@ -930,10 +918,10 @@ function CreateProjectForm({
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-200">Starter rules</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Starter rules</p>
                 <p className="text-xs text-slate-500">Optional defaults and automation the manager can refine later.</p>
               </div>
               <Button type="button" variant="secondary" size="sm" onClick={() => setTrackingRules((current) => [...current, createRuleDraft(current.length)])}>
@@ -946,7 +934,7 @@ function CreateProjectForm({
             ) : (
               <div className="space-y-3">
                 {trackingRules.map((rule, index) => (
-                  <div key={rule.id} className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                  <div key={rule.id} className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-3">
                     <div className="mb-3 flex items-center justify-between">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Rule {index + 1}</p>
                       <button
@@ -1009,8 +997,8 @@ function CreateProjectForm({
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <p className="text-sm font-semibold text-slate-200">Preview</p>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Preview</p>
             <p className="mt-1 text-xs text-slate-500">
               {setupTracking
                 ? `${categoryName || `${projectName || 'Project'} Tracking`} will be created with ${trackingCodes.filter((code) => code.label.trim()).length || 1} grouped code${trackingCodes.filter((code) => code.label.trim()).length === 1 ? '' : 's'} and ${trackingRules.filter((rule) => rule.name.trim() && rule.action_value.trim()).length} starter rule${trackingRules.filter((rule) => rule.name.trim() && rule.action_value.trim()).length === 1 ? '' : 's'}.`
@@ -1026,7 +1014,7 @@ function CreateProjectForm({
         </div>
       )}
 
-      <div className="flex justify-between gap-3 border-t border-slate-800 pt-4">
+      <div className="flex justify-between gap-3 border-t border-slate-200 dark:border-slate-800 pt-4">
         <div>
           {step > 0 && (
             <Button type="button" variant="secondary" onClick={prevStep}>

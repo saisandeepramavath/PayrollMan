@@ -59,7 +59,7 @@ export function AssignmentsPage() {
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Assignments</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Assignments</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             {assignments?.length ?? 0} total assignments
           </p>
@@ -67,18 +67,14 @@ export function AssignmentsPage() {
       </div>
 
       {/* Status tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-900 rounded-xl p-1 w-fit border border-slate-800">
+      <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-900 rounded-xl p-1 w-fit border border-slate-200 dark:border-slate-800">
         {STATUS_TABS.map((tab) => {
           const count = tab === 'all' ? assignments?.length : assignments?.filter((a) => a.status === tab).length;
           return (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all capitalize ${
-                activeTab === tab
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
+              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all capitalize ${ activeTab === tab ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800' }`}
             >
               {tab} {count !== undefined && (
                 <span className={`ml-1 text-[10px] ${activeTab === tab ? 'text-indigo-200' : 'text-slate-600'}`}>
@@ -100,21 +96,21 @@ export function AssignmentsPage() {
         />
       ) : (
         <Card>
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-slate-200 dark:divide-slate-800">
             {filtered.map((assignment) => {
               const project = projectMap[assignment.project_id];
               return (
                 <div
                   key={assignment.id}
-                  className="px-6 py-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                  className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
                       <FolderKanban className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-200">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                           {project?.name ?? `Project #${assignment.project_id}`}
                         </p>
                         {project?.code && (
@@ -124,7 +120,7 @@ export function AssignmentsPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                           {userMap[assignment.user_id]?.full_name ?? `User #${assignment.user_id}`}
                         </span>
                         <span className="text-slate-700">·</span>
@@ -183,7 +179,7 @@ export function AssignmentsPage() {
       {/* Delete confirm */}
       <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} title="Remove Assignment">
         <div className="flex flex-col gap-5">
-          <p className="text-sm text-slate-400">Remove this assignment? This cannot be undone.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">Remove this assignment? This cannot be undone.</p>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button

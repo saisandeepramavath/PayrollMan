@@ -146,7 +146,7 @@ export function TimeTrackingPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-100">Time Tracking</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Time Tracking</h1>
         <p className="text-sm text-slate-500 mt-0.5">Track your attendance in real-time</p>
       </div>
 
@@ -156,11 +156,7 @@ export function TimeTrackingPage() {
           <div className="flex flex-col items-center py-6">
             {/* Clock circle */}
             <div
-              className={`w-36 h-36 rounded-full flex flex-col items-center justify-center mb-6 border-2 transition-all duration-500 ${
-                activePunch
-                  ? 'border-emerald-500/50 bg-emerald-500/5 shadow-lg shadow-emerald-500/10'
-                  : 'border-slate-700 bg-slate-800/50'
-              }`}
+              className={`w-36 h-36 rounded-full flex flex-col items-center justify-center mb-6 border-2 transition-all duration-500 ${ activePunch ? 'border-emerald-500/50 bg-emerald-500/5 shadow-lg shadow-emerald-500/10' : 'border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50' }`}
             >
               {activePunch ? (
                 <>
@@ -188,7 +184,7 @@ export function TimeTrackingPage() {
                 <div className="text-slate-700">·</div>
                 <div className="text-center">
                   <p className="text-xs text-slate-600 mb-1">Date</p>
-                  <p className="font-semibold text-slate-300">{formatDate(activePunch.date ?? activePunch.punch_in)}</p>
+                  <p className="font-semibold text-slate-700 dark:text-slate-300">{formatDate(activePunch.date ?? activePunch.punch_in)}</p>
                 </div>
               </div>
             )}
@@ -237,7 +233,7 @@ export function TimeTrackingPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Optional note…"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
                 />
               </div>
             )}
@@ -250,7 +246,7 @@ export function TimeTrackingPage() {
         <Card>
           <CardBody className="!py-4">
             <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Today</p>
-            <p className="text-2xl font-bold text-slate-100">{minutesToHours(todayMinutes)}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{minutesToHours(todayMinutes)}</p>
           </CardBody>
         </Card>
         <Card>
@@ -262,7 +258,7 @@ export function TimeTrackingPage() {
         <Card>
           <CardBody className="!py-4">
             <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">All Time</p>
-            <p className="text-2xl font-bold text-slate-100">{minutesToHours(totalMinutes)}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{minutesToHours(totalMinutes)}</p>
           </CardBody>
         </Card>
       </div>
@@ -271,8 +267,8 @@ export function TimeTrackingPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-slate-400" />
-            <h2 className="text-sm font-semibold text-slate-200">Attendance History</h2>
+            <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Attendance History</h2>
           </div>
           <span className="text-xs text-slate-600">{entries?.length ?? 0} records</span>
         </CardHeader>
@@ -290,9 +286,9 @@ export function TimeTrackingPage() {
               {weekGroups.map((week) => (
                 <div key={week.key}>
                   {/* Week header */}
-                  <div className="flex items-center justify-between px-6 py-3 bg-slate-800/60 border-b border-slate-800 sticky top-0 z-10">
+                  <div className="flex items-center justify-between px-6 py-3 bg-slate-100 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-300">{week.label}</span>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{week.label}</span>
                       {week.isCurrent && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
                           This week
@@ -305,11 +301,11 @@ export function TimeTrackingPage() {
                   </div>
 
                   {/* Punch set rows for this week */}
-                  <div className="divide-y divide-slate-800/60">
+                  <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
                     {week.entries.map((entry) => (
                       <div
                         key={entry.id}
-                        className="px-6 py-3.5 flex items-center justify-between hover:bg-slate-800/30 transition-colors"
+                        className="px-6 py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                       >
                         {/* Left: date + punch set */}
                         <div className="flex items-center gap-4 min-w-0">
@@ -318,7 +314,7 @@ export function TimeTrackingPage() {
                             <p className="text-[10px] text-slate-500 leading-none uppercase">
                               {parsePunchDate(entry.date).toLocaleDateString('en-US', { weekday: 'short' })}
                             </p>
-                            <p className="text-base font-bold text-slate-300 leading-tight mt-0.5">
+                            <p className="text-base font-bold text-slate-700 dark:text-slate-300 leading-tight mt-0.5">
                               {parsePunchDate(entry.date).getDate()}
                             </p>
                           </div>
@@ -358,11 +354,11 @@ export function TimeTrackingPage() {
                         {/* Right: duration + delete */}
                         <div className="flex items-center gap-4 flex-shrink-0">
                           {entry.duration_display ? (
-                            <span className="text-sm font-semibold text-slate-200 tabular-nums bg-slate-800/60 px-2.5 py-1 rounded-lg">
+                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 tabular-nums bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg">
                               {entry.duration_display}
                             </span>
                           ) : entry.duration_minutes ? (
-                            <span className="text-sm font-semibold text-slate-200 tabular-nums bg-slate-800/60 px-2.5 py-1 rounded-lg">
+                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 tabular-nums bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg">
                               {minutesToHours(entry.duration_minutes)}
                             </span>
                           ) : (
@@ -390,7 +386,7 @@ export function TimeTrackingPage() {
       {/* Delete confirm */}
       <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} title="Delete Entry">
         <div className="flex flex-col gap-5">
-          <p className="text-sm text-slate-400">Remove this punch entry? This cannot be undone.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">Remove this punch entry? This cannot be undone.</p>
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button

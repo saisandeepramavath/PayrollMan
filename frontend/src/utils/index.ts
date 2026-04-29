@@ -55,15 +55,15 @@ export function getInitials(name: string) {
 }
 
 export const PROJECT_STATUS_CONFIG = {
-  active: { label: 'Active', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' },
-  on_hold: { label: 'On Hold', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-  completed: { label: 'Completed', color: 'text-sky-400 bg-sky-400/10 border-sky-400/20' },
-  cancelled: { label: 'Cancelled', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20' },
+  active: { label: 'Active', color: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/25' },
+  on_hold: { label: 'On Hold', color: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/25' },
+  completed: { label: 'Completed', color: 'text-sky-700 dark:text-sky-300 bg-sky-500/10 border-sky-500/25' },
+  cancelled: { label: 'Cancelled', color: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/25' },
 } as const;
 
 export const ASSIGNMENT_STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-  approved: { label: 'Approved', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' },
-  rejected: { label: 'Rejected', color: 'text-rose-400 bg-rose-400/10 border-rose-400/20' },
-  revoked: { label: 'Revoked', color: 'text-slate-400 bg-slate-400/10 border-slate-400/20' },
+  pending: { label: 'Pending', color: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/25' },
+  approved: { label: 'Approved', color: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/25' },
+  rejected: { label: 'Rejected', color: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/25' },
+  revoked: { label: 'Revoked', color: 'text-slate-700 dark:text-slate-300 bg-slate-500/10 border-slate-400/30 dark:border-slate-600' },
 } as const;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Clock, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { login as loginApi } from '../../api/endpoints';
 import { Button } from '../../components/ui/Button';
@@ -49,11 +49,9 @@ export function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/30">
-            <Clock className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.svg" alt="PayrollMan Logo" className="w-12 h-12 mb-4 shadow-lg shadow-indigo-600/30" />
           <h1 className="text-xl font-bold text-slate-100">Welcome back</h1>
-          <p className="text-sm text-slate-500 mt-1">Sign in to your WorkTracker account</p>
+          <p className="text-sm text-slate-500 mt-1">Sign in to your PayrollMan account</p>
         </div>
 
         {/* Card */}

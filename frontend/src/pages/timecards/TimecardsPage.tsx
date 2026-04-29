@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useMemo, type FocusEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Clock, Calendar, Plus, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Calendar, Plus, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { ManagerTimecardGrid } from './ManagerTimecardGrid';
 import {
   createPunchEntry,
@@ -25,9 +25,11 @@ import { Button } from '../../components/ui/Button';
 import { PageLoader } from '../../components/ui';
 import { Modal } from '../../components/ui/Modal';
 import { Input, Select, Textarea } from '../../components/ui/Input';
+import { WeekPicker } from '../../components/ui/WeekPicker';
 import { formatTime, minutesToHours } from '../../utils';
 import { format, addDays } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type PunchDraft = {
   id?: number;
@@ -168,8 +170,9 @@ function buildUtcIsoFromLocalTime(dateStr: string, timeValue: string): string {
 
 export function TimecardsPage() {
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, canViewAllTimecards } = useAuth();
+  const { theme } = useTheme();
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
   const [localHours, setLocalHours] = useState<Record<string, string>>({});
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -689,10 +692,10 @@ export function TimecardsPage() {
   const remainingWeeklyHours = weeklyLimit != null ? Math.max(weeklyLimit - weekTotalHours, 0) : null;
   const weeklyOverage = weeklyLimit != null ? Math.max(weekTotalHours - weeklyLimit, 0) : 0;
   const workflowConfig: Record<TimecardSubmission['status'], { label: string; cls: string }> = {
-    draft: { label: 'Draft', cls: 'text-slate-300 bg-slate-500/10 border-slate-500/30' },
-    submitted: { label: 'Submitted', cls: 'text-amber-300 bg-amber-500/10 border-amber-500/30' },
-    on_hold: { label: 'On Hold', cls: 'text-rose-300 bg-rose-500/10 border-rose-500/30' },
-    approved: { label: 'Approved', cls: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' },
+    draft: { label: 'Draft', cls: 'text-slate-700 dark:text-slate-300 bg-slate-500/10 border-slate-500/30' },
+    submitted: { label: 'Submitted', cls: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/30' },
+    on_hold: { label: 'On Hold', cls: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30' },
+    approved: { label: 'Approved', cls: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30' },
   };
   const helperText = isViewingOtherUser
     ? 'Managers and accountants review submitted or held weeks here and approve them once issues are cleared.'
@@ -704,17 +707,58 @@ export function TimecardsPage() {
           ? 'This week has been approved and is read-only.'
           : 'Your entries save when you leave a field. Submit the week once it is ready for approval.';
 
+  const updateSearchParams = (updates: Record<string, string | null>) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null) {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+    });
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleWeekStartChange = (nextWeekStart: Date) => {
+    const normalizedWeekStart = getMonday(nextWeekStart);
+    setWeekStart(normalizedWeekStart);
+    updateSearchParams({
+      week: format(normalizedWeekStart, 'yyyy-MM-dd'),
+      issue: null,
+    });
+  };
+
+  const handleBackToTeamView = () => {
+    setManagerGridView(true);
+    updateSearchParams({
+      user: null,
+      issue: null,
+      week: format(weekStart, 'yyyy-MM-dd'),
+    });
+  };
+
   // Manager grid view handler
   const handleGridSelectUser = (userId: number, gridWeek?: Date) => {
+    const nextWeekStart = gridWeek ? getMonday(gridWeek) : weekStart;
     setSelectedUserId(userId);
-    if (gridWeek) setWeekStart(gridWeek);
+    setWeekStart(nextWeekStart);
+    updateSearchParams({
+      user: String(userId),
+      week: format(nextWeekStart, 'yyyy-MM-dd'),
+      issue: null,
+    });
     setManagerGridView(false);
   };
 
   if (canViewAllTimecards && managerGridView) {
-    return <ManagerTimecardGrid onSelectUser={handleGridSelectUser} />;
+    return (
+      <ManagerTimecardGrid
+        weekStart={weekStart}
+        onWeekStartChange={handleWeekStartChange}
+        onSelectUser={handleGridSelectUser}
+      />
+    );
   }
-
   return (
     <div className="w-full">
       {/* Page header */}
@@ -723,87 +767,71 @@ export function TimecardsPage() {
           <div className="flex items-center gap-3">
             {canViewAllTimecards && (
               <button
-                onClick={() => setManagerGridView(true)}
-                className="rounded-lg border border-slate-700 bg-slate-800/60 p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+                onClick={handleBackToTeamView}
+                className={theme === 'dark' ? "rounded-lg border border-slate-700 bg-slate-800/60 p-1.5 text-slate-400 transition-colors hover:bg-slate-600 hover:text-slate-100" : "rounded-lg border border-slate-300 bg-white p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"}
                 title="Back to team view"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            <h1 className="text-2xl font-bold text-slate-100">Weekly Timecard</h1>
+            <h1 className={theme === 'dark' ? "text-2xl font-bold text-slate-300" : "text-2xl font-bold text-slate-900"}>Weekly Timecard</h1>
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${workflowConfig[currentWorkflowStatus].cls}`}
+              className={theme=== 'dark' ? `inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${workflowConfig[currentWorkflowStatus].cls}` : `inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${workflowConfig[currentWorkflowStatus].cls}`}
             >
               Workflow: {workflowConfig[currentWorkflowStatus].label}
             </span>
-            <span className="inline-flex rounded-full border border-slate-700 bg-slate-800/50 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+            <span className={theme === 'dark' ? "inline-flex rounded-full border border-slate-700 bg-slate-900/50 px-2.5 py-0.5 text-xs font-medium text-slate-300" : "inline-flex rounded-full border border-slate-300 bg-white/50 px-2.5 py-0.5 text-xs font-medium text-slate-700"}>
               Week: {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
             </span>
             {viewedUser && (
-              <span className="inline-flex rounded-full border border-slate-700 bg-slate-800/50 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+              <span className={theme === 'dark' ? "inline-flex rounded-full border border-slate-700 bg-slate-900/50 px-2.5 py-0.5 text-xs font-medium text-slate-300" : "inline-flex rounded-full border border-slate-300 bg-white px-2.5 py-0.5 text-xs font-medium text-slate-700"}>
                 Viewing: {viewedUser.full_name}
               </span>
             )}
             {isViewingOtherUser && (
-              <span className="inline-flex rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300">
+              <span className={theme === 'dark' ? "inline-flex rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300" : "inline-flex rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-700"}>
                 Read-only reviewer access
               </span>
             )}
           </div>
 
           <div className="mt-3 max-w-3xl space-y-2.5">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-300">
+            <div className={theme === 'dark' ? "rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-300" : "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700"}>
               {helperText}
             </div>
             {requestedIssueId && (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
+              <div className={theme === 'dark' ? "rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200" : "rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700"}>
                 Reviewing issue #{requestedIssueId}. Inspect this user&apos;s entries here, then finish the resolution from Alerts.
               </div>
             )}
             {weekSubmission?.auto_approve_at && currentWorkflowStatus === 'submitted' && (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
+              <div className={theme === 'dark' ? "rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200" : "rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700"}>
                 Auto-approval scheduled for {format(new Date(weekSubmission.auto_approve_at), 'MMM d, yyyy p')} if no issues are opened before then.
               </div>
             )}
             {(weekSubmission?.unresolved_issue_count ?? 0) > 0 && (
-              <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-200">
+              <div className={theme === 'dark' ? "rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-200" : "rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700"}>
                 {weekSubmission?.unresolved_issue_count} linked issue{weekSubmission?.unresolved_issue_count === 1 ? '' : 's'} must be resolved before approval.
               </div>
             )}
             {!isViewingOtherUser && (currentWorkflowStatus === 'submitted' || currentWorkflowStatus === 'on_hold') && (
-              <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-2.5 text-sm text-sky-200">
+              <div className={theme === 'dark' ? "rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-2.5 text-sm text-sky-200" : "rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-2.5 text-sm text-sky-700"}>
                 {manualEditMode
                   ? 'Manual edit mode is on. Saving any change will move this week back to draft so you can resubmit it.'
                   : 'This week is locked for review. Use Manual Edit to make changes and resubmit it afterward.'}
               </div>
             )}
             {saveError && (
-              <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-300">
+              <div className={theme === 'dark' ? "rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-300" : "rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700"}>
                 {saveError}
               </div>
             )}
           </div>
         </div>
         <div className="relative z-[120] flex flex-wrap items-start justify-end gap-2 xl:items-start">
-          <div className="flex items-center gap-0.5 rounded-lg border border-slate-700 bg-slate-800/60 px-1">
-            <button
-              onClick={() => setWeekStart((d) => addDays(d, -7))}
-              className="rounded p-1.5 text-slate-400 transition-colors hover:text-slate-100"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-2 text-xs font-medium whitespace-nowrap text-slate-300">
-              {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
-            </span>
-            <button
-              onClick={() => setWeekStart((d) => addDays(d, 7))}
-              className="rounded p-1.5 text-slate-400 transition-colors hover:text-slate-100"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WeekPicker weekStart={weekStart} onWeekStartChange={handleWeekStartChange} compact />
           <Button variant="secondary" onClick={() => setShowIssueModal(true)}>
             <ShieldAlert className="w-4 h-4" />
             Report Issue
@@ -881,7 +909,7 @@ export function TimecardsPage() {
       ) : (
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
           {/* ── Main grid ── */}
-          <div className="min-w-0 rounded-xl border border-slate-700/60 bg-slate-900 overflow-auto max-h-[calc(100vh-180px)] xl:flex-1">
+          <div className="min-w-0 rounded-xl border border-slate-200 bg-white dark:border-slate-700/60 dark:bg-slate-900 overflow-auto max-h-[calc(100vh-180px)] xl:flex-1">
             <table className="min-w-[860px] w-full border-collapse text-sm">
               <colgroup>
                 <col style={{ width: '112px' }} />
@@ -892,29 +920,23 @@ export function TimecardsPage() {
 
               {/* Day header row */}
               <thead>
-                <tr className="border-b border-slate-700">
-                  <th className="sticky top-0 left-0 z-40 px-4 py-3 bg-slate-800" />
+                <tr className="border-b border-slate-300 dark:border-slate-700">
+                  <th className="sticky top-0 left-0 z-40 px-4 py-3 bg-slate-200 dark:bg-slate-800" />
                   {weekDays.map((day) => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const isToday = dateStr === todayStr;
                     return (
                       <th
                         key={day.toISOString()}
-                        className={`sticky top-0 z-30 px-3 py-3 text-center border-l border-slate-700/60 ${
-                          isToday ? 'bg-[#1e2040]' : 'bg-slate-800'
-                        }`}
+                        className={`sticky top-0 z-30 px-3 py-3 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-50 dark:bg-[#1e2040]' : 'bg-slate-200 dark:bg-slate-800' }`}
                       >
                         <p
-                          className={`text-[10px] uppercase tracking-wide font-semibold ${
-                            isToday ? 'text-indigo-400' : 'text-slate-500'
-                          }`}
+                          className={`text-[10px] uppercase tracking-wide font-semibold ${ isToday ? 'text-indigo-400' : 'text-slate-500' }`}
                         >
                           {format(day, 'EEE')}
                         </p>
                         <p
-                          className={`text-base font-bold mt-0.5 leading-none ${
-                            isToday ? 'text-indigo-300' : 'text-slate-300'
-                          }`}
+                          className={`text-base font-bold mt-0.5 leading-none ${ isToday ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300' }`}
                         >
                           {format(day, 'd')}
                         </p>
@@ -929,11 +951,11 @@ export function TimecardsPage() {
                   })}
                 </tr>
 
-                <tr className="border-t-2 border-slate-700">
-                  <th className="sticky top-[84px] left-0 z-40 px-4 py-3 bg-slate-800 border-r border-slate-700/60 whitespace-nowrap">
+                <tr className="border-t-2 border-slate-300 dark:border-slate-700">
+                  <th className="sticky top-[84px] left-0 z-40 px-4 py-3 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3 h-3 text-slate-500" />
-                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                         Total Hours
                       </span>
                     </div>
@@ -945,14 +967,10 @@ export function TimecardsPage() {
                     return (
                       <th
                         key={`punch-total-${day.toISOString()}`}
-                        className={`sticky top-[84px] z-20 px-3 py-3 text-center border-l border-slate-700/60 ${
-                          isToday ? 'bg-[#1e2040]' : 'bg-slate-800'
-                        }`}
+                        className={`sticky top-[84px] z-20 px-3 py-3 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-50 dark:bg-[#1e2040]' : 'bg-slate-200 dark:bg-slate-800' }`}
                       >
                         <span
-                          className={`text-sm font-bold tabular-nums ${
-                            mins > 0 ? 'text-slate-100' : 'text-slate-700'
-                          }`}
+                          className={`text-sm font-bold tabular-nums ${ mins > 0 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700' }`}
                         >
                           {mins > 0 ? minutesToHours(mins) : '—'}
                         </span>
@@ -969,12 +987,12 @@ export function TimecardsPage() {
                     {/* Punch In row */}
                     <tr
                       key={`in-${i}`}
-                      className={i > 0 ? 'border-t border-slate-800/60' : ''}
+                      className={i > 0 ? 'border-t border-slate-200 dark:border-slate-800/60' : ''}
                     >
-                      <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-800 border-r border-slate-700/60 whitespace-nowrap">
+                      <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                          <span className="text-xs font-medium text-slate-400">
+                          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                             Punch in{maxPairs > 1 ? ` ${i + 1}` : ''}
                           </span>
                           {showPunchInputs && i >= basePunchPairCount && (
@@ -989,9 +1007,7 @@ export function TimecardsPage() {
                         return (
                           <td
                             key={day.toISOString()}
-                            className={`px-3 py-2.5 text-center border-l border-slate-700/60 ${
-                              isToday ? 'bg-indigo-500/5' : ''
-                            }`}
+                            className={`px-3 py-2.5 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-500/5' : '' }`}
                           >
                             {showPunchInputs ? (
                               <input
@@ -1015,11 +1031,11 @@ export function TimecardsPage() {
                     </tr>
 
                     {/* Punch Out row */}
-                    <tr key={`out-${i}`} className="border-t border-slate-800/40">
-                      <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-800 border-r border-slate-700/60 whitespace-nowrap">
+                    <tr key={`out-${i}`} className="border-t border-slate-200 dark:border-slate-800/40">
+                      <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60 whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0" />
-                          <span className="text-xs font-medium text-slate-400">
+                          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                             Punch out{maxPairs > 1 ? ` ${i + 1}` : ''}
                           </span>
                           {showPunchInputs && i >= basePunchPairCount && (
@@ -1034,9 +1050,7 @@ export function TimecardsPage() {
                         return (
                           <td
                             key={day.toISOString()}
-                            className={`px-3 py-2.5 text-center border-l border-slate-700/60 ${
-                              isToday ? 'bg-indigo-500/5' : ''
-                            }`}
+                            className={`px-3 py-2.5 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-500/5' : '' }`}
                           >
                             {showPunchInputs ? (
                               <input
@@ -1066,13 +1080,13 @@ export function TimecardsPage() {
                 ))}
 
                 {/* ── Spacer + section label ── */}
-                <tr className="border-t border-slate-700/40">
-                  <td colSpan={8} className="py-1.5 bg-slate-800/20" />
+                <tr className="border-t border-slate-200 dark:border-slate-700/40">
+                  <td colSpan={8} className="py-1.5 bg-slate-100 dark:bg-slate-800/20" />
                 </tr>
-                <tr className="border-t border-slate-700/60">
+                <tr className="border-t border-slate-200 dark:border-slate-700/60">
                   <td
                     colSpan={8}
-                    className="px-4 py-2 bg-slate-800/60"
+                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800/60"
                   >
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3 h-3 text-slate-500" />
@@ -1097,15 +1111,15 @@ export function TimecardsPage() {
                   groupedBuckets.flatMap((group, groupIndex) => {
                     const isCollapsed = collapsedGroups[group.key] ?? false;
                     const rows = [
-                      <tr key={`group-${group.key}`} className={`border-t ${groupIndex === 0 ? 'border-slate-700/60' : 'border-slate-700/40'}`}>
-                        <td className="sticky left-0 z-10 px-4 py-3 bg-slate-800 border-r border-slate-700/60">
+                      <tr key={`group-${group.key}`} className={`border-t ${groupIndex === 0 ? 'border-slate-200 dark:border-slate-700/60' : 'border-slate-200 dark:border-slate-700/40'}`}>
+                        <td className="sticky left-0 z-10 px-4 py-3 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60">
                           <button
                             type="button"
                             onClick={() => toggleGroup(group.key)}
                             className="flex w-full items-start justify-between gap-2 text-left"
                           >
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">{group.title}</p>
+                              <p className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">{group.title}</p>
                               <p className="mt-1 text-[10px] leading-4 text-slate-500">{group.description}</p>
                             </div>
                             {isCollapsed ? (
@@ -1125,11 +1139,9 @@ export function TimecardsPage() {
                           return (
                             <td
                               key={`${group.key}-${dateStr}`}
-                              className={`px-3 py-3 text-center border-l border-slate-700/60 ${
-                                isToday ? 'bg-indigo-500/10' : 'bg-slate-800/20'
-                              }`}
+                              className={`px-3 py-3 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-500/10' : 'bg-slate-50 dark:bg-slate-800/20' }`}
                             >
-                              <span className={`text-xs font-semibold tabular-nums ${total > 0 ? 'text-slate-100' : 'text-slate-600'}`}>
+                              <span className={`text-xs font-semibold tabular-nums ${total > 0 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-600'}`}>
                                 {total > 0 ? `${total}h` : '—'}
                               </span>
                             </td>
@@ -1143,11 +1155,11 @@ export function TimecardsPage() {
                         ...group.buckets.map((bucket, idx) => (
                           <tr
                             key={bucket.key}
-                            className={`border-t border-slate-800/60 ${idx % 2 !== 0 ? 'bg-slate-800/10' : ''}`}
+                            className={`border-t border-slate-200 dark:border-slate-800/60 ${idx % 2 !== 0 ? 'bg-slate-50 dark:bg-slate-800/10' : ''}`}
                           >
-                            <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-800 border-r border-slate-700/60">
+                            <td className="sticky left-0 z-10 px-4 py-2.5 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60">
                               <p
-                                className="text-xs font-medium text-slate-300 truncate max-w-[160px]"
+                                className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[160px]"
                                 title={bucket.label}
                               >
                                 {bucket.label}
@@ -1161,9 +1173,7 @@ export function TimecardsPage() {
                               return (
                                 <td
                                   key={day.toISOString()}
-                                  className={`px-2 py-2 border-l border-slate-700/60 ${
-                                    isToday ? 'bg-indigo-500/5' : ''
-                                  }`}
+                                  className={`px-2 py-2 border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-500/5' : '' }`}
                                 >
                                   <input
                                     type="number"
@@ -1180,11 +1190,7 @@ export function TimecardsPage() {
                                       }))
                                     }
                                     onBlur={() => handleHoursBlur(bucket, dateStr)}
-                                    className={`w-full text-xs text-center bg-transparent text-slate-300 placeholder-slate-700 rounded px-1 py-1 tabular-nums transition-colors ${
-                                      !canEditViewedWeek
-                                        ? 'cursor-not-allowed text-slate-500'
-                                        : 'focus:outline-none focus:bg-indigo-500/10 focus:ring-1 focus:ring-indigo-500/40'
-                                    }`}
+                                    className={`w-full text-xs text-center bg-transparent text-slate-700 dark:text-slate-300 placeholder-slate-700 rounded px-1 py-1 tabular-nums transition-colors ${ !canEditViewedWeek ? 'cursor-not-allowed text-slate-500' : 'focus:outline-none focus:bg-indigo-500/10 focus:ring-1 focus:ring-indigo-500/40' }`}
                                   />
                                 </td>
                               );
@@ -1199,11 +1205,11 @@ export function TimecardsPage() {
                 )}
 
                 {/* ── Project totals row ── */}
-                <tr className="border-t-2 border-slate-700">
-                  <td className="sticky left-0 z-10 px-4 py-3 bg-slate-800 border-r border-slate-700/60 whitespace-nowrap">
+                <tr className="border-t-2 border-slate-300 dark:border-slate-700">
+                  <td className="sticky left-0 z-10 px-4 py-3 bg-slate-200 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700/60 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3 h-3 text-slate-500" />
-                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                         Total Hours
                       </span>
                     </div>
@@ -1215,14 +1221,10 @@ export function TimecardsPage() {
                     return (
                       <td
                         key={day.toISOString()}
-                        className={`px-3 py-3 text-center border-l border-slate-700/60 ${
-                          isToday ? 'bg-indigo-500/10' : 'bg-slate-800/40'
-                        }`}
+                        className={`px-3 py-3 text-center border-l border-slate-200 dark:border-slate-700/60 ${ isToday ? 'bg-indigo-500/10' : 'bg-slate-100 dark:bg-slate-800/40' }`}
                       >
                         <span
-                          className={`text-sm font-bold tabular-nums ${
-                            total > 0 ? 'text-slate-100' : 'text-slate-700'
-                          }`}
+                          className={`text-sm font-bold tabular-nums ${ total > 0 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700' }`}
                         >
                           {total > 0 ? `${total}h` : '—'}
                         </span>
@@ -1236,59 +1238,59 @@ export function TimecardsPage() {
 
           {/* ── Right: weekly summary / rule progress ── */}
           <div className="w-full flex-shrink-0 flex flex-col gap-3 xl:w-48">
-            <div className="rounded-xl border border-slate-700 bg-slate-800/40 p-3 text-left">
+            <div className="rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800/40 p-3 text-left">
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
                 Approval Flow
               </p>
-              <p className="text-xs text-slate-300">Current status</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">Current status</p>
               <p className="mt-1 text-[11px] leading-5 text-slate-500">
                 {workflowConfig[currentWorkflowStatus].label}
               </p>
               {weekSubmission?.submitted_at && (
                 <>
-                  <p className="mt-3 text-xs text-slate-300">Submitted</p>
+                  <p className="mt-3 text-xs text-slate-700 dark:text-slate-300">Submitted</p>
                   <p className="mt-1 text-[11px] leading-5 text-slate-500">{format(new Date(weekSubmission.submitted_at), 'MMM d, yyyy p')}</p>
                 </>
               )}
               {weekSubmission?.approved_at && (
                 <>
-                  <p className="mt-3 text-xs text-slate-300">Approved</p>
+                  <p className="mt-3 text-xs text-slate-700 dark:text-slate-300">Approved</p>
                   <p className="mt-1 text-[11px] leading-5 text-slate-500">{format(new Date(weekSubmission.approved_at), 'MMM d, yyyy p')}</p>
                 </>
               )}
               {(weekSubmission?.unresolved_issue_count ?? 0) > 0 && (
                 <>
-                  <p className="mt-3 text-xs text-slate-300">Open issues</p>
+                  <p className="mt-3 text-xs text-slate-700 dark:text-slate-300">Open issues</p>
                   <p className="mt-1 text-[11px] leading-5 text-slate-500">{weekSubmission?.unresolved_issue_count}</p>
                 </>
               )}
             </div>
             <div className={`rounded-xl p-4 ${weeklyLimit != null ? 'border border-amber-500/30 bg-amber-500/10' : 'border border-indigo-500/30 bg-indigo-500/10'} text-center`}>
-              <p className={`text-[10px] uppercase tracking-widest font-semibold leading-relaxed mb-3 ${weeklyLimit != null ? 'text-amber-300/90' : 'text-indigo-400/80'}`}>
+              <p className={`text-[10px] uppercase tracking-widest font-semibold leading-relaxed mb-3 ${weeklyLimit != null ? 'text-amber-700 dark:text-amber-300/90' : 'text-indigo-700 dark:text-indigo-400/80'}`}>
                 {weeklyLimit != null ? 'Weekly Progress' : 'Total Hours'}<br />for Week
               </p>
-              <p className={`text-3xl font-bold tabular-nums ${weeklyLimit != null ? 'text-amber-200' : 'text-indigo-300'}`}>
+              <p className={`text-3xl font-bold tabular-nums ${weeklyLimit != null ? 'text-amber-700 dark:text-amber-200' : 'text-indigo-700 dark:text-indigo-300'}`}>
                 {minutesToHours(weekTotalMins)}
               </p>
               {weeklyLimit != null ? (
                 <div className="mt-3 space-y-2 text-left">
-                  <div className="flex items-center justify-between text-[11px] text-amber-100/80">
+                  <div className="flex items-center justify-between text-[11px] text-amber-700 dark:text-amber-100/80">
                     <span>Rule cap</span>
                     <span className="font-semibold">{weeklyLimit}h</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-900/60">
+                  <div className="h-2 overflow-hidden rounded-full bg-amber-100 dark:bg-slate-900/60">
                     <div
                       className={`h-full rounded-full ${weeklyOverage > 0 ? 'bg-rose-400' : 'bg-amber-300'}`}
                       style={{ width: `${Math.min((weekTotalHours / weeklyLimit) * 100, 100)}%` }}
                     />
                   </div>
-                  <p className={`text-[10px] ${weeklyOverage > 0 ? 'text-rose-300' : 'text-amber-200/80'}`}>
+                  <p className={`text-[10px] ${weeklyOverage > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-amber-700 dark:text-amber-200/80'}`}>
                     {weeklyOverage > 0
                       ? `${weeklyOverage.toFixed(1)}h over the rule cap`
                       : `${remainingWeeklyHours?.toFixed(1)}h remaining this week`}
                   </p>
                   {!!effectiveRule?.applied_rule_names?.length && (
-                    <div className="rounded-lg border border-amber-500/20 bg-slate-950/40 px-2 py-2 text-[10px] text-amber-100/75">
+                    <div className="rounded-lg border border-amber-500/20 bg-white/60 px-2 py-2 text-[10px] text-amber-800 dark:bg-slate-950/40 dark:text-amber-100/75">
                       <div className="mb-1 flex items-center gap-1">
                         <ShieldAlert className="w-3 h-3" />
                         <span>Applied rules</span>
@@ -1305,11 +1307,11 @@ export function TimecardsPage() {
                 </p>
               )}
             </div>
-            <div className="rounded-xl border border-slate-700 bg-slate-800/40 p-3 text-center">
+            <div className="rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800/40 p-3 text-center">
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
                 Days Active
               </p>
-              <p className="text-2xl font-bold text-slate-200">
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">
                 {
                   weekDays.filter(
                     (d) => (dayTotals.get(format(d, 'yyyy-MM-dd')) ?? 0) > 0
@@ -1318,15 +1320,15 @@ export function TimecardsPage() {
                 <span className="text-sm text-slate-500 font-normal">/7</span>
               </p>
             </div>
-            <div className="rounded-xl border border-slate-700 bg-slate-800/40 p-3 text-left">
+            <div className="rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800/40 p-3 text-left">
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
                 Tracking Setup
               </p>
-              <p className="text-xs text-slate-300">Configured categories</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">Configured categories</p>
               <p className="mt-1 text-[11px] leading-5 text-slate-500">
                 {trackingCategories?.length ?? 0}
               </p>
-              <p className="mt-3 text-xs text-slate-300">Active tracking codes</p>
+              <p className="mt-3 text-xs text-slate-700 dark:text-slate-300">Active tracking codes</p>
               <p className="mt-1 text-[11px] leading-5 text-slate-500">
                 {allocationBuckets.filter((bucket) => bucket.source === 'category').length}
               </p>

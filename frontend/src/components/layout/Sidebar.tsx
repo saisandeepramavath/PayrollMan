@@ -2,7 +2,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FolderKanban,
-  Clock,
   ClipboardList,
   Users,
   Shield,
@@ -10,9 +9,13 @@ import {
   TriangleAlert,
   LogOut,
   ChevronRight,
+  UserPlus,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { cn } from '../../utils';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Avatar } from '../ui/Avatar';
 
 const NAV_ITEMS = [
@@ -25,20 +28,24 @@ const NAV_ITEMS = [
 
 const ADMIN_ITEMS = [
   { to: '/admin', icon: Shield, label: 'Admin Panel' },
+  { to: '/admin/onboarding', icon: UserPlus, label: 'Onboard Employee' },
   { to: '/admin/issues', icon: TriangleAlert, label: 'Alerts' },
   { to: '/admin/rules', icon: SlidersHorizontal, label: 'Rules Board' },
 ];
 
-function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof Clock; label: string }) {
+function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
+  const { theme } = useTheme();
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group',
+          'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group border',
           isActive
             ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-600/20'
-            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800 border border-transparent'
+            : theme === 'dark'
+              ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800 border-transparent'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-transparent'
         )
       }
     >
@@ -47,7 +54,11 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof Clock; la
           <Icon
             className={cn(
               'w-4 h-4 flex-shrink-0 transition-colors',
-              isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'
+              isActive
+                ? 'text-indigo-400'
+                : theme === 'dark'
+                  ? 'text-slate-500 group-hover:text-slate-300'
+                  : 'text-slate-500 group-hover:text-slate-700'
             )}
           />
           <span className="truncate">{label}</span>
@@ -59,7 +70,8 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof Clock; la
 }
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { user, logout, isAdmin, canManageAssignments } = useAuth();
+  const { user, logout, canManageUsers, canManageAssignments } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -81,21 +93,41 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       <aside
         className={cn(
           'fixed top-0 left-0 z-40 h-screen w-64 flex flex-col',
-          'bg-slate-950 border-r border-slate-800',
-          'transition-transform duration-200 ease-out',
+          'border-r transition-colors duration-200',
           'lg:translate-x-0',
+          theme === 'dark'
+            ? 'bg-slate-950 border-slate-800'
+            : 'bg-white border-slate-200',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-4 h-4 text-white" />
+        {/* Logo + Theme toggle */}
+        <div className={cn(
+          'flex items-center justify-between px-5 py-5 border-b gap-2',
+          theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
+        )}>
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="Logo" className="w-8 h-8 flex-shrink-0" />
+            <div>
+              <p className={`text-sm font-bold leading-none ${theme === 'dark' ? 'text-slate-50' : 'text-slate-900'}`}>PayrollMan</p>
+              <p className={`text-[10px] mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Time & Projects</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-bold text-slate-100 leading-none">WorkTracker</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Time & Projects</p>
-          </div>
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-lg transition-colors ${
+              theme === 'dark'
+                ? 'hover:bg-slate-800 text-slate-400 hover:text-slate-100'
+                : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+            }`}
+            title="Toggle light/dark mode"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
         </div>
 
         {/* Navigation */}
@@ -109,7 +141,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             ))}
           </div>
 
-          {isAdmin && (
+          {canManageUsers && (
             <div className="flex flex-col gap-1 mt-6">
               <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest px-3 mb-2">
                 Administration
@@ -122,12 +154,12 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </nav>
 
         {/* User footer */}
-        <div className="px-3 py-4 border-t border-slate-800">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800/60 cursor-pointer group">
+        <div className={`px-3 py-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
+          <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-100'} cursor-pointer group`}>
             <Avatar name={user?.full_name ?? 'User'} size="sm" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name}</p>
-              <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+              <p className={`text-xs font-semibold truncate ${theme === 'dark' ? 'text-slate-50' : 'text-slate-900'}`}>{user?.full_name}</p>
+              <p className={`text-[10px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}

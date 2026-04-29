@@ -1,38 +1,32 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronLeft, ChevronRight, Clock, Users } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { Search, Clock, Users } from 'lucide-react';
+import { format } from 'date-fns';
 import { getUsers, listTimecardSubmissions } from '../../api/endpoints';
-import type { User, TimecardSubmission } from '../../types';
-
-function getMonday(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+import type { TimecardSubmission } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
+import { WeekPicker } from '../../components/ui/WeekPicker';
 
 const statusConfig: Record<TimecardSubmission['status'], { label: string; cls: string; dot: string }> = {
-  draft: { label: 'Draft', cls: 'text-slate-400 bg-slate-500/10 border-slate-500/30', dot: 'bg-slate-400' },
-  submitted: { label: 'Submitted', cls: 'text-amber-300 bg-amber-500/10 border-amber-500/30', dot: 'bg-amber-400' },
-  on_hold: { label: 'On Hold', cls: 'text-rose-300 bg-rose-500/10 border-rose-500/30', dot: 'bg-rose-400' },
-  approved: { label: 'Approved', cls: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30', dot: 'bg-emerald-400' },
+  draft: { label: 'Draft', cls: 'text-slate-600 dark:text-slate-400 bg-slate-500/10 border-slate-500/30', dot: 'bg-slate-400' },
+  submitted: { label: 'Submitted', cls: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/30', dot: 'bg-amber-400' },
+  on_hold: { label: 'On Hold', cls: 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30', dot: 'bg-rose-400' },
+  approved: { label: 'Approved', cls: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30', dot: 'bg-emerald-400' },
 };
 
 type StatusFilter = 'all' | TimecardSubmission['status'] | 'needs_review';
 
 interface ManagerTimecardGridProps {
+  weekStart: Date;
+  onWeekStartChange: (weekStart: Date) => void;
   onSelectUser: (userId: number, weekStart?: Date) => void;
 }
 
-export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) {
-  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
+export function ManagerTimecardGrid({ weekStart, onWeekStartChange, onSelectUser }: ManagerTimecardGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const { theme } = useTheme();
 
-  const weekEnd = addDays(weekStart, 6);
   const startStr = format(weekStart, 'yyyy-MM-dd');
 
   const { data: users, isLoading: usersLoading } = useQuery({
@@ -131,32 +125,16 @@ export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) 
       <div className="mb-6">
         <div className="flex items-center gap-3">
           <Users className="h-6 w-6 text-indigo-400" />
-          <h1 className="text-2xl font-bold text-slate-100">Team Timecards</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Team Timecards</h1>
         </div>
-        <p className="mt-1.5 text-sm text-slate-400">
+        <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
           Review and manage employee timecards. Click on an employee to view their detailed timecard.
         </p>
       </div>
 
       {/* Week picker + search */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-0.5 rounded-lg border border-slate-700 bg-slate-800/60 px-1">
-          <button
-            onClick={() => setWeekStart((d) => addDays(d, -7))}
-            className="rounded p-1.5 text-slate-400 transition-colors hover:text-slate-100"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="px-3 text-sm font-medium whitespace-nowrap text-slate-300">
-            Week of {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
-          </span>
-          <button
-            onClick={() => setWeekStart((d) => addDays(d, 7))}
-            className="rounded p-1.5 text-slate-400 transition-colors hover:text-slate-100"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+        <WeekPicker weekStart={weekStart} onWeekStartChange={onWeekStartChange} />
 
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -165,7 +143,7 @@ export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) 
             placeholder="Search employees..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800/60 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 sm:w-64"
+            className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition-colors focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder-slate-500 sm:w-64"
           />
         </div>
       </div>
@@ -179,11 +157,7 @@ export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) 
             <button
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                active
-                  ? 'border-indigo-500/40 bg-indigo-500/15 text-indigo-300'
-                  : 'border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-slate-300'
-              }`}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${ active ? 'border-indigo-500/40 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-300' }`}
             >
               {tab.label}
               {count > 0 && (
@@ -198,7 +172,7 @@ export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) 
 
       {/* Employee grid */}
       {filteredUsers.length === 0 ? (
-        <div className="rounded-xl border border-slate-700/60 bg-slate-900 py-16 text-center">
+        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center dark:border-slate-700/60 dark:bg-slate-900">
           <p className="text-sm text-slate-500">
             {searchQuery || statusFilter !== 'all'
               ? 'No employees match your filters.'
@@ -211,20 +185,19 @@ export function ManagerTimecardGrid({ onSelectUser }: ManagerTimecardGridProps) 
             const sub = submissionsByUser.get(employee.id);
             const status = sub?.status ?? 'draft';
             const cfg = statusConfig[status];
-
             return (
               <button
                 key={employee.id}
                 type="button"
                 onClick={() => onSelectUser(employee.id, weekStart)}
-                className="group rounded-xl border border-slate-700/60 bg-slate-900 p-4 text-left transition-all hover:border-slate-600 hover:bg-slate-800/80 hover:shadow-lg hover:shadow-indigo-500/5"
+                className={theme === 'dark' ? "group rounded-xl border border-slate-700/60 bg-slate-900 p-4 text-left transition-all hover:border-slate-600 hover:bg-slate-800/80 hover:shadow-lg hover:shadow-indigo-500/5" : "group rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-lg hover:shadow-slate-200/60"}
               >
                 {/* Name + email */}
                 <div className="mb-3 min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-200 group-hover:text-slate-100">
+                  <p className={theme === 'dark' ? "truncate text-sm font-semibold text-slate-500 group-hover:text-slate-300 dark:group-hover:text-slate-100" : "truncate text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-slate-100"}>
                     {employee.full_name}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-slate-500">
+                  <p className={theme === 'dark' ? "mt-0.5 truncate text-xs text-slate-500" : "mt-0.5 truncate text-xs text-slate-500"}>
                     {employee.email}
                   </p>
                 </div>

@@ -3,11 +3,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { PageLoader } from '../ui';
 
 export function ProtectedRoute({ adminOnly = false }: { adminOnly?: boolean }) {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, canManageUsers } = useAuth();
 
   if (isLoading) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
+  if (adminOnly && !canManageUsers) return <Navigate to="/dashboard" replace />;
 
   return <Outlet />;
 }

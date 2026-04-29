@@ -26,6 +26,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False, index=True)
     code = Column(String(50), unique=True, nullable=False, index=True)  # Unique project code
+    sub_code = Column(String(100))  # Sub-category (e.g., "technical-development", "reporting", "infrastructure")
     description = Column(Text)
     
     # Organizational details

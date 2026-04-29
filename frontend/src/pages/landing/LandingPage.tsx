@@ -120,7 +120,7 @@ function Navbar() {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
             <Clock className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-bold text-slate-100 tracking-tight">WorkTracker</span>
+          <span className="text-sm font-bold text-slate-100 tracking-tight">PayrollMan</span>
         </div>
 
         <div className="hidden md:flex items-center gap-7">
@@ -177,7 +177,7 @@ function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/25 bg-indigo-500/8 mb-8 text-xs font-medium text-indigo-300">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-          Now in production — start tracking today
+          Development
         </div>
 
         {/* Headline */}
@@ -193,7 +193,7 @@ function HeroSection() {
         </h1>
 
         <p className="text-lg text-slate-400 max-w-xl leading-relaxed mb-10">
-          WorkTracker brings attendance, project management, and team assignments into one clean
+          PayrollMan brings attendance, project management, and team assignments into one clean
           interface — built for teams that value clarity over complexity.
         </p>
 
@@ -455,7 +455,7 @@ function Footer() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
             <Clock className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-sm font-bold text-slate-400">WorkTracker</span>
+          <span className="text-sm font-bold text-slate-400">PayrollMan</span>
         </div>
         <p className="text-xs text-slate-700">
           Built with FastAPI + React. MIT licensed.

@@ -2,17 +2,19 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../utils';
 import { Button } from './Button';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   children: ReactNode;
   className?: string;
 }
 
 export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -38,17 +40,21 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
     >
       <div
         className={cn(
-          'w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl',
+          'w-full max-w-lg rounded-2xl border shadow-2xl',
           'animate-in fade-in zoom-in-95 duration-150',
+          colors.card.bg,
+          colors.card.border,
           className
         )}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
-          <h2 className="text-base font-semibold text-slate-100">{title}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose} className="!p-1.5 rounded-lg">
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+        {title && (
+          <div className={cn('flex items-center justify-between px-6 py-5 border-b', colors.border.default)}>
+            <h2 className={cn('text-base font-semibold', colors.text.primary)}>{title}</h2>
+            <Button variant="ghost" size="sm" onClick={onClose} className="!p-1.5 rounded-lg">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
         <div className="p-6">{children}</div>
       </div>
     </div>

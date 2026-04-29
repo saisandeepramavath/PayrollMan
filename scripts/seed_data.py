@@ -143,16 +143,17 @@ def create_projects(
     db: Session,
     manager: User,
     company: str,
-    projects_data: list[tuple[str, str, str, str]],
+    projects_data: list[tuple[str, str, str, str, str]],
     start_base: datetime,
     no_approval_codes: list[str] | None = None,
 ) -> list[Project]:
     no_approval_codes = no_approval_codes or []
     projects: list[Project] = []
-    for code, name, department, description in projects_data:
+    for code, name, sub_code, department, description in projects_data:
         project = Project(
             code=code,
             name=name,
+            sub_code=sub_code,
             department=department,
             description=description,
             company=company,
@@ -198,116 +199,132 @@ def assign_projects(
 
 def build_task_descriptions() -> dict[str, list[str]]:
     return {
-        "ATT": [
-            "AT&T permit packet review",
-            "Fiber route validation for AT&T segment",
-            "AT&T handoff checklist update",
-            "Field dependency follow-up with AT&T vendor",
-        ],
-        "PON400": [
-            "PON 400 splice map verification",
-            "OLT and splitter capacity review for PON 400",
-            "PON 400 outage prevention checklist",
-            "Distribution cabinet audit for PON 400 rollout",
-        ],
         "TMS": [
-            "Implemented punch-in endpoint",
+            "Implemented punch-in/out REST endpoint",
             "Fixed JWT token refresh logic",
-            "Added pagination to timecard list",
+            "Added pagination to timecard list API",
             "Code review and PR feedback",
             "Wrote unit tests for auth service",
-            "Database schema migration",
+            "Database schema migration and indexing",
+            "Implemented timecard submission workflow",
         ],
         "MOBILE": [
             "Built clock-in UI component",
-            "Integrated REST client",
-            "Fixed offline sync bug",
-            "Wrote E2E tests",
-            "Push notification setup",
+            "Integrated REST API client",
+            "Fixed offline sync bug with SQLite",
+            "Wrote E2E tests for mobile flows",
+            "Push notification setup and testing",
+            "Gesture navigation implementation",
         ],
         "DBOPT": [
-            "Analysed slow query log",
+            "Analyzed slow query log",
             "Added composite index on punch_entries",
             "Rewrote N+1 ORM queries",
-            "Index utilisation report",
+            "Query execution plan optimization",
+            "Connection pool tuning",
         ],
-        "SEC": [
-            "OWASP checklist review",
-            "Penetration testing auth endpoints",
-            "Dependency vulnerability scan",
-            "Hardened CORS and CSP headers",
+        "APIDEV": [
+            "Designed RESTful API endpoints",
+            "Implemented OAuth2 authentication",
+            "Built rate limiting middleware",
+            "Wrote API documentation and examples",
+            "Created postman collection for testing",
+            "Implemented request validation schemas",
         ],
-        "PORTAL": [
-            "Built invoice download page",
-            "Support form validation",
-            "OAuth2 login integration",
-            "Accessibility audit",
+        "FRONTEND": [
+            "Built dashboard components",
+            "Implemented React Query for server state",
+            "Created reusable UI component library",
+            "Fixed responsive design issues",
+            "Performance optimization for large tables",
+            "Accessibility audit and WCAG compliance",
         ],
-        "OPS": [
-            "Shift handoff workflow",
-            "Operations incident dashboard",
-            "Queue escalation tuning",
-            "SLA breach alerts",
+        "DEVOPS": [
+            "Set up GitHub Actions CI/CD pipeline",
+            "Dockerized application services",
+            "Kubernetes deployment manifests",
+            "Prometheus monitoring and alerting",
+            "Database backup and recovery setup",
+            "Terraform infrastructure as code",
         ],
-        "BILL": [
-            "Invoice generation cron fix",
-            "Ledger reconciliation script",
-            "Payment retry workflow",
-            "Tax rules integration",
+        "TESTING": [
+            "Wrote unit tests with pytest",
+            "Implemented integration test suite",
+            "E2E testing with Selenium/Cypress",
+            "Test coverage analysis and reporting",
+            "Load testing and stress testing",
+            "Test automation framework improvements",
+        ],
+        "SECURITY": [
+            "OWASP security checklist review",
+            "SQL injection vulnerability scan",
+            "Penetration testing results analysis",
+            "Dependency vulnerability assessment",
+            "CORS and CSP header hardening",
+            "Secrets management implementation",
         ],
         "ANALYTICS": [
-            "Kafka consumer refactor",
-            "Added Flink aggregation job",
-            "Schema registry update",
-            "Backfill historical events",
+            "Built data ingestion pipeline",
+            "Implemented event schema validation",
+            "Created aggregation queries",
+            "Performance tuning for big queries",
+            "Real-time stream processing setup",
         ],
         "MLPIPE": [
-            "Feature pipeline rollout",
-            "Model accuracy benchmarks",
-            "Shadow mode A/B test",
-            "Deployed serving endpoint",
+            "Feature engineering pipeline development",
+            "Model training infrastructure setup",
+            "Hyperparameter tuning experiments",
+            "Model evaluation and validation",
+            "Production model serving API",
         ],
-        "DASH": [
-            "Added revenue YTD tile",
-            "Drill-down filter component",
-            "Performance optimisation",
-            "Fixed cross-browser chart bug",
+        "SPARK": [
+            "Spark job optimization",
+            "Distributed computing task tuning",
+            "RDD to DataFrame migration",
+            "Partitioning strategy implementation",
+            "Shuffle optimization techniques",
         ],
-        "GOV": [
-            "Column lineage mapping",
-            "Retention policy review",
-            "PII access workflow",
-            "Compliance evidence export",
+        "DATASEC": [
+            "Encryption algorithm implementation",
+            "Role-based access control system",
+            "Data classification framework",
+            "Audit logging system",
+            "Policy enforcement engine",
         ],
-        "STREAM": [
-            "Lag heatmap panel",
-            "Consumer retry metrics",
-            "Alert routing cleanup",
-            "Partition skew investigation",
+        "DATAOBS": [
+            "Data quality metric definitions",
+            "Anomaly detection algorithms",
+            "Dashboard UI implementation",
+            "Alert notification system",
+            "Metadata collection framework",
         ],
-        "ROUTE": [
-            "Route cost heuristics",
-            "Dispatch map rendering",
-            "Geo-fence event ingestion",
-            "Traffic prediction hook-up",
+        "ROUTING": [
+            "Route optimization algorithm",
+            "Graph traversal implementation",
+            "Distance matrix calculation",
+            "Real-time traffic integration",
+            "API endpoint development",
         ],
-        "WARE": [
-            "Bin occupancy report",
-            "Inbound scan workflow",
-            "Cycle count variance analysis",
-            "Dock utilisation chart",
+        "TRACKING": [
+            "GPS data ingestion system",
+            "Geospatial indexing with PostGIS",
+            "Real-time location streaming",
+            "Historical tracking queries",
+            "Map visualization API",
         ],
-        "FLEET": [
-            "Maintenance reminder service",
-            "Service log cleanup",
-            "Vehicle downtime analytics",
-            "Parts inventory sync",
+        "MOBILEAPP": [
+            "Location tracking feature",
+            "Offline-first architecture",
+            "Navigation UI implementation",
+            "Native module integration",
+            "App performance optimization",
         ],
-        "ETA": [
-            "Delivery ETA feature set",
-            "Model drift monitoring",
-            "Realtime scoring endpoint",
-            "Courier telemetry cleanup",
+        "ANALYTICS": [
+            "Analytics dashboard development",
+            "Report generation system",
+            "Data aggregation queries",
+            "Performance metrics calculation",
+            "Export functionality",
         ],
     }
 
@@ -906,30 +923,29 @@ def seed_data() -> None:
             tech_manager,
             "TechCorp Solutions",
             [
-                ("ATT", "AT&T Fiber Expansion", "Telecom Delivery", "AT&T outside plant coordination, field delivery tracking, and deployment reporting"),
-                ("PON400", "PON 400 Upgrade Program", "Telecom Delivery", "PON 400 rollout planning, splitter capacity reviews, and closeout tracking"),
-                ("TMS", "Timecard Management System", "Engineering", "Full-stack time-tracking platform with REST API and React frontend"),
-                ("MOBILE", "Mobile App Development", "Engineering", "Cross-platform mobile client for field employees"),
-                ("DBOPT", "Database Optimisation", "Infrastructure", "Query tuning, indexing strategy, and migration tooling"),
-                ("SEC", "Security Audit", "Security", "Penetration testing and hardening recommendations"),
-                ("PORTAL", "Customer Self-Service Portal", "Product", "Portal for invoices and support tickets"),
-                ("OPS", "Operations Control Center", "Operations", "Control room dashboards and shift handoff tooling"),
-                ("BILL", "Billing Automation", "Finance Tech", "Automated invoicing, reconciliation, and ledger integrations"),
+                ("TMS", "Timecard Management System", "technical-development", "Engineering", "Full-stack time-tracking platform with REST API, database layer, and React frontend"),
+                ("MOBILE", "Mobile App Development", "technical-development", "Engineering", "Cross-platform mobile client for field employees using React Native"),
+                ("DBOPT", "Database Optimization", "infrastructure", "Infrastructure", "Query tuning, index optimization strategy, and migration tooling for SQLAlchemy ORM"),
+                ("APIDEV", "REST API Framework", "technical-development", "Backend Engineering", "RESTful API design, authentication, authorization, and integration testing"),
+                ("FRONTEND", "React Frontend Framework", "technical-development", "Frontend Engineering", "Component library, state management, UI/UX design, and performance optimization"),
+                ("DEVOPS", "DevOps & Infrastructure", "infrastructure", "Infrastructure", "CI/CD pipelines, Docker containerization, Kubernetes orchestration, and monitoring"),
+                ("TESTING", "Quality Assurance", "testing", "QA Engineering", "Unit testing, integration testing, E2E testing, and test automation frameworks"),
+                ("SECURITY", "Security & Hardening", "security", "Security Engineering", "Penetration testing, vulnerability scanning, and security best practices implementation"),
             ],
             start_base,
-            no_approval_codes=["TMS", "PORTAL", "OPS"],
+            no_approval_codes=["TMS", "FRONTEND", "APIDEV"],
         )
         tech_user_projects = assign_projects(
             db,
             tech_manager,
             [
-                (tech_employees[0], [(tech_projects[0], "AT&T Delivery Lead"), (tech_projects[1], "PON 400 Coordinator")]),
-                (tech_employees[1], [(tech_projects[0], "Field Systems Engineer"), (tech_projects[3], "Mobile Developer")]),
-                (tech_employees[2], [(tech_projects[1], "Network Reporting Analyst"), (tech_projects[6], "UI Developer")]),
-                (tech_employees[3], [(tech_projects[5], "Security Engineer"), (tech_projects[2], "DevOps Engineer")]),
-                (tech_employees[4], [(tech_projects[6], "Full Stack Developer"), (tech_projects[4], "Database Developer")]),
-                (tech_employees[5], [(tech_projects[7], "Operations Engineer"), (tech_projects[0], "Platform Support")]),
-                (tech_employees[6], [(tech_projects[8], "Finance Systems Engineer"), (tech_projects[6], "Backend Engineer")]),
+                (tech_employees[0], [(tech_projects[0], "Backend Developer"), (tech_projects[3], "API Architect")]),
+                (tech_employees[1], [(tech_projects[1], "Mobile Developer"), (tech_projects[4], "Frontend Engineer")]),
+                (tech_employees[2], [(tech_projects[4], "React Developer"), (tech_projects[6], "QA Engineer")]),
+                (tech_employees[3], [(tech_projects[7], "Security Engineer"), (tech_projects[5], "DevOps Engineer")]),
+                (tech_employees[4], [(tech_projects[2], "Database Developer"), (tech_projects[3], "Backend Engineer")]),
+                (tech_employees[5], [(tech_projects[5], "Infrastructure Engineer"), (tech_projects[0], "Full Stack Developer")]),
+                (tech_employees[6], [(tech_projects[6], "QA Lead"), (tech_projects[4], "UI Developer")]),
             ],
             approval_at,
         )
@@ -952,25 +968,25 @@ def seed_data() -> None:
             dataflow_manager,
             "DataFlow Inc",
             [
-                ("ANALYTICS", "Analytics Platform", "Data Engineering", "Real-time event ingestion and aggregation pipeline"),
-                ("MLPIPE", "ML Pipeline", "Data Science", "Feature engineering, model training, and serving infrastructure"),
-                ("DASH", "Executive Dashboard", "Product", "Interactive KPI dashboard for leadership"),
-                ("GOV", "Data Governance Hub", "Compliance", "Lineage, access governance, and policy workflows"),
-                ("STREAM", "Streaming Observability", "Platform", "Operational visibility into streaming jobs and lag metrics"),
+                ("ANALYTICS", "Analytics Data Platform", "technical-development", "Data Engineering", "Real-time event ingestion, aggregation, and OLAP query engine development"),
+                ("MLPIPE", "ML Pipeline Framework", "technical-development", "Data Science", "Feature engineering libraries, model training infrastructure, and model serving API"),
+                ("SPARK", "Apache Spark Optimization", "infrastructure", "Data Infrastructure", "Distributed computing optimization, spark tuning, and cluster management"),
+                ("DATASEC", "Data Security Framework", "security", "Security Engineering", "Data encryption, access control, and compliance enforcement system"),
+                ("DATAOBS", "Data Observability Platform", "monitoring", "Platform Engineering", "Data quality metrics, anomaly detection, and operational dashboards"),
             ],
             start_base,
-            no_approval_codes=["DASH", "STREAM"],
+            no_approval_codes=["ANALYTICS", "SPARK"],
         )
         dataflow_user_projects = assign_projects(
             db,
             dataflow_manager,
             [
-                (dataflow_employees[0], [(dataflow_projects[0], "Data Engineer"), (dataflow_projects[1], "Pipeline Engineer")]),
-                (dataflow_employees[1], [(dataflow_projects[1], "ML Engineer"), (dataflow_projects[2], "BI Developer")]),
-                (dataflow_employees[2], [(dataflow_projects[0], "Backend Engineer"), (dataflow_projects[2], "Visualisation Developer")]),
+                (dataflow_employees[0], [(dataflow_projects[0], "Data Engineer"), (dataflow_projects[1], "ML Engineer")]),
+                (dataflow_employees[1], [(dataflow_projects[1], "ML Developer"), (dataflow_projects[2], "Spark Engineer")]),
+                (dataflow_employees[2], [(dataflow_projects[0], "Backend Engineer"), (dataflow_projects[4], "Dashboard Developer")]),
                 (dataflow_employees[3], [(dataflow_projects[0], "Data Analyst"), (dataflow_projects[1], "Data Scientist")]),
-                (dataflow_employees[4], [(dataflow_projects[3], "Governance Analyst"), (dataflow_projects[2], "Product Analyst")]),
-                (dataflow_employees[5], [(dataflow_projects[4], "Site Reliability Engineer"), (dataflow_projects[0], "Streaming Engineer")]),
+                (dataflow_employees[4], [(dataflow_projects[3], "Security Engineer"), (dataflow_projects[4], "Monitoring Engineer")]),
+                (dataflow_employees[5], [(dataflow_projects[2], "Infrastructure Engineer"), (dataflow_projects[0], "Pipeline Engineer")]),
             ],
             approval_at,
         )
@@ -991,31 +1007,31 @@ def seed_data() -> None:
             northstar_manager,
             "NorthStar Logistics",
             [
-                ("ROUTE", "Route Optimizer", "Logistics Tech", "Smart route planning and dispatch optimisation platform"),
-                ("WARE", "Warehouse Insight", "Operations", "Inventory movement visibility and warehouse analytics"),
-                ("FLEET", "Fleet Maintenance", "Operations", "Vehicle maintenance scheduling and alerts"),
-                ("ETA", "ETA Predictions", "Data Science", "Predictive delivery ETA models with real-time updates"),
+                ("ROUTING", "Routing Engine", "technical-development", "Backend Engineering", "Graph-based route optimization algorithm and dispatch optimization system"),
+                ("TRACKING", "GPS Tracking System", "technical-development", "Backend Engineering", "Real-time GPS data ingestion, processing, and geospatial queries"),
+                ("MOBILEAPP", "Mobile Fleet App", "technical-development", "Mobile Engineering", "Cross-platform mobile app for drivers with offline capabilities"),
+                ("LOGANALYTICS", "Logistics Analytics", "reporting", "Data Engineering", "Analytics dashboards for fleet insights and performance reporting"),
             ],
             start_base,
-            no_approval_codes=["FLEET"],
+            no_approval_codes=["ROUTING"],
         )
         northstar_user_projects = assign_projects(
             db,
             northstar_manager,
             [
-                (northstar_employees[0], [(northstar_projects[0], "Backend Engineer"), (northstar_projects[3], "ML Integrator")]),
-                (northstar_employees[1], [(northstar_projects[1], "Operations Analyst"), (northstar_projects[0], "Frontend Engineer")]),
-                (northstar_employees[2], [(northstar_projects[2], "Platform Engineer"), (northstar_projects[1], "Warehouse Systems Engineer")]),
-                (northstar_employees[3], [(northstar_projects[3], "Data Scientist"), (northstar_projects[2], "Reporting Engineer")]),
+                (northstar_employees[0], [(northstar_projects[0], "Backend Engineer"), (northstar_projects[1], "Geospatial Engineer")]),
+                (northstar_employees[1], [(northstar_projects[2], "Mobile Developer"), (northstar_projects[0], "Algorithm Engineer")]),
+                (northstar_employees[2], [(northstar_projects[1], "Full Stack Developer"), (northstar_projects[2], "Frontend Developer")]),
+                (northstar_employees[3], [(northstar_projects[3], "Analytics Engineer"), (northstar_projects[2], "QA Engineer")]),
             ],
             approval_at,
         )
 
-        all_employees = tech_employees + dataflow_employees + northstar_employees
+        all_employees = tech_employees + dataflow_employees  # + northstar_employees
         all_user_projects = {
             **tech_user_projects,
             **dataflow_user_projects,
-            **northstar_user_projects,
+            # **northstar_user_projects,
         }
         clean_demo_user = tech_employees[0]
         clean_demo_user_ids = {clean_demo_user.id}
@@ -1034,19 +1050,19 @@ def seed_data() -> None:
             dataflow_manager,
             dataflow_projects,
         )
-        ns_category_count, ns_code_count, ns_rule_count = create_tracking_setup(
-            db,
-            northstar_manager,
-            northstar_projects,
-        )
+        # ns_category_count, ns_code_count, ns_rule_count = create_tracking_setup(
+        #     db,
+        #     northstar_manager,
+        #     northstar_projects,
+        # )
 
-        tracking_category_count += df_category_count + ns_category_count
-        tracking_code_count += df_code_count + ns_code_count
-        tracking_rule_count += df_rule_count + ns_rule_count
+        tracking_category_count += df_category_count  # + ns_category_count
+        tracking_code_count += df_code_count  # + ns_code_count
+        tracking_rule_count += df_rule_count  # + ns_rule_count
         employee_manager_ids = {
             **{employee.id: tech_manager.id for employee in tech_employees},
             **{employee.id: dataflow_manager.id for employee in dataflow_employees},
-            **{employee.id: northstar_manager.id for employee in northstar_employees},
+            # **{employee.id: northstar_manager.id for employee in northstar_employees},
         }
         issue_report_count = create_issue_reports(
             db,
@@ -1067,23 +1083,23 @@ def seed_data() -> None:
         # TechCorp employees requesting to join projects they aren't on
         demo_requests.append(ProjectAssignment(
             user_id=tech_employees[0].id,  # Sandeep
-            project_id=tech_projects[2].id,  # TMS
+            project_id=tech_projects[2].id,  # DBOPT
             role="Full Stack Developer",
             assigner_id=tech_employees[0].id,
             status=AssignmentStatus.PENDING,
-            notes="Would love to contribute to the TMS project",
+            notes="Would love to contribute to the DBOPT project",
         ))
         demo_requests.append(ProjectAssignment(
             user_id=tech_employees[1].id,  # Nithikesh
-            project_id=tech_projects[4].id,  # DBOPT
-            role="Database Developer",
+            project_id=tech_projects[6].id,  # TESTING
+            role="QA Engineer",
             assigner_id=tech_employees[1].id,
             status=AssignmentStatus.PENDING,
-            notes="Interested in database optimisation work",
+            notes="Interested in quality assurance and testing work",
         ))
         demo_requests.append(ProjectAssignment(
             user_id=tech_employees[2].id,  # Sumeeth
-            project_id=tech_projects[5].id,  # SEC
+            project_id=tech_projects[7].id,  # SECURITY
             role="Security Tester",
             assigner_id=tech_employees[2].id,
             status=AssignmentStatus.PENDING,
@@ -1092,8 +1108,8 @@ def seed_data() -> None:
         # A rejected request
         demo_requests.append(ProjectAssignment(
             user_id=tech_employees[3].id,  # Jatin
-            project_id=tech_projects[8].id,  # BILL
-            role="Finance Developer",
+            project_id=tech_projects[5].id,  # DEVOPS
+            role="DevOps Engineer",
             assigner_id=tech_employees[3].id,
             status=AssignmentStatus.REJECTED,
             approved_by_id=tech_manager.id,
@@ -1105,15 +1121,15 @@ def seed_data() -> None:
         db.commit()
         demo_request_count = len(demo_requests)
 
-        total_projects = len(tech_projects) + len(dataflow_projects) + len(northstar_projects)
+        total_projects = len(tech_projects) + len(dataflow_projects)  # + len(northstar_projects)
         total_assignments = sum(len(projects) for projects in all_user_projects.values())
 
         print()
         print("=" * 70)
         print("DATABASE SEEDED SUCCESSFULLY")
         print("=" * 70)
-        print(f"Companies: 3")
-        print(f"Managers: 3")
+        print(f"Companies: 2")
+        print(f"Managers: 2")
         print(f"Employees: {len(all_employees)}")
         print(f"Projects: {total_projects}")
         print(f"Assignments: {total_assignments}")
@@ -1131,7 +1147,7 @@ def seed_data() -> None:
         print("Manager logins:")
         print("  sunil@techcorp.com / sunil123")
         print("  priya@dataflow.com / priya123")
-        print("  meera@northstar.com / meera123")
+        # print("  meera@northstar.com / meera123")
         print()
         print("Clean demo user (draft week, no seeded alerts):")
         print(f"  {clean_demo_user.email} / sandeep123")
