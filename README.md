@@ -1,6 +1,6 @@
-# Timecard Management System
+# PayrollMan - Timecard Management System
 
-Production-ready employee time tracking platform with FastAPI backend and React frontend.
+Production-ready employee time tracking and payroll management platform with FastAPI backend and React frontend.
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
@@ -148,7 +148,7 @@ graph TB
 ## Project Structure
 
 ```
-timecard_backend_full/
+PayrollMan/
 │
 ├── frontend/                        # React Frontend (TypeScript)
 │   ├── src/
@@ -248,8 +248,8 @@ timecard_backend_full/
 
 ```bash
 # Clone repository
-git clone <repository-url>
-cd timecard_backend_full
+git clone https://github.com/saisandeepramavath/PayrollMan.git
+cd PayrollMan
 
 # Create virtual environment
 python -m venv venv
